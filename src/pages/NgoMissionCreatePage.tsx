@@ -6,7 +6,7 @@ import { useAuth } from '../auth/auth-context'
 import { AddressAutocomplete } from '../components/AddressAutocomplete'
 import type { AddressSelection } from '../components/AddressAutocomplete'
 import { getCategoryIllustrationPath } from '../lib/category-illustrations'
-import { createNgoMission, getMissionFormOptions, getMyNgoApplication, uploadMissionImage } from '../services/ngos'
+import { createNgoMission, deleteMissionImage, getMissionFormOptions, getMyNgoApplication, uploadMissionImage } from '../services/ngos'
 
 type Option = { slug: string; name_fr: string }
 type Difficulty = 'standard' | 'demanding' | 'high'
@@ -68,7 +68,7 @@ function slugify(value: string) {
 }
 
 function approximateLocation(latitude: number, longitude: number) {
-  const distanceMeters = 35 + Math.random() * 45
+  const distanceMeters = 60 + Math.random() * 40
   const angle = Math.random() * Math.PI * 2
   const latitudeOffset = (distanceMeters * Math.cos(angle)) / 111_320
   const longitudeOffset = (distanceMeters * Math.sin(angle)) / (111_320 * Math.cos((latitude * Math.PI) / 180))
@@ -104,20 +104,23 @@ export function NgoMissionCreatePage() {
   const [showCustomAccessibility, setShowCustomAccessibility] = useState(false)
   const [customAccessibility, setCustomAccessibility] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [loadError, setLoadError] = useState(false)
   const calculatedDurationMinutes = calculateDurationMinutes(startsAtValue, endsAtValue)
   const activeRequirementOptions = requirementGroups.find((group) => group.value === activeRequirementGroup)
 
   useEffect(() => {
     if (!user) return
     let isCurrent = true
-    void Promise.all([getMyNgoApplication(), getMissionFormOptions()]).then(([application, options]) => {
-      if (!isCurrent) return
-      setIsApproved(application?.status === 'approved')
-      setCategories(options.categories)
-      setTags(options.tags)
-      setSelectedCategory(options.categories[0]?.slug ?? '')
-      setIsLoading(false)
-    })
+    void Promise.all([getMyNgoApplication(), getMissionFormOptions()])
+      .then(([application, options]) => {
+        if (!isCurrent) return
+        setIsApproved(application?.status === 'approved')
+        setCategories(options.categories)
+        setTags(options.tags)
+        setSelectedCategory(options.categories[0]?.slug ?? '')
+      })
+      .catch(() => { if (isCurrent) setLoadError(true) })
+      .finally(() => { if (isCurrent) setIsLoading(false) })
     return () => { isCurrent = false }
   }, [user])
 
@@ -187,6 +190,7 @@ export function NgoMissionCreatePage() {
     setErrorMessage('')
     const form = new FormData(event.currentTarget)
     const value = (name: string) => String(form.get(name) || '').trim()
+    let uploadedImageUrl = ''
 
     try {
       const title = value('title')
@@ -203,6 +207,10 @@ export function NgoMissionCreatePage() {
         setErrorMessage('La fin de la mission doit être postérieure à son début.')
         return
       }
+      if (startsAt <= new Date()) {
+        setErrorMessage('Le début de la mission doit être dans le futur.')
+        return
+      }
       if (Number.isNaN(registrationDeadline.getTime())) {
         setErrorMessage('Vérifiez la date limite d’inscription.')
         return
@@ -212,9 +220,30 @@ export function NgoMissionCreatePage() {
         return
       }
 
+      if (!unlimitedCapacity && (!Number.isInteger(Number(value('capacity'))) || Number(value('capacity')) < 1)) {
+        setErrorMessage('Le nombre de places doit être un entier supérieur à zéro.')
+        return
+      }
+      if (image && (image.size > 8 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(image.type))) {
+        setErrorMessage('L’image doit être un fichier JPG, PNG ou WebP de 8 Mo maximum.')
+        return
+      }
+      if (requestUrgent) {
+        const urgencyNeededAt = new Date(value('urgencyNeededBy'))
+        if (Number.isNaN(urgencyNeededAt.getTime())) {
+          setErrorMessage('Indiquez quand le besoin urgent doit être couvert.')
+          return
+        }
+        if (urgencyNeededAt <= new Date()) {
+          setErrorMessage('La date du besoin urgent doit être dans le futur.')
+          return
+        }
+      }
+
       const coverImagePath = image
         ? await uploadMissionImage(user.id, image)
         : getCategoryIllustrationPath(selectedCategory)
+      if (image) uploadedImageUrl = coverImagePath
       const requirements = [
         ...selectedRequirements.skills.map((item) => `Compétence : ${item}`),
         ...selectedRequirements.equipment.map((item) => `Matériel : ${item}`),
@@ -240,6 +269,7 @@ export function NgoMissionCreatePage() {
       })
       navigate(`/missions/${result.mission_slug}`, { replace: true })
     } catch (error) {
+      if (uploadedImageUrl) void deleteMissionImage(uploadedImageUrl).catch(() => undefined)
       const message = typeof error === 'object' && error !== null && 'message' in error ? String(error.message) : ''
       setErrorMessage(message || 'La mission n’a pas pu être créée.')
     } finally {
@@ -249,6 +279,7 @@ export function NgoMissionCreatePage() {
 
   if (!isAuthLoading && !user) return <Blocked />
   if (isAuthLoading || isLoading) return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
+  if (loadError) return <main className="grid min-h-dvh place-items-center bg-white p-6 text-center"><div><h1 className="text-xl font-bold">Formulaire indisponible</h1><p className="mt-2 text-sm text-slate-500">Les catégories n’ont pas pu être chargées.</p><button className="mt-5 min-h-11 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={() => window.location.reload()} type="button">Réessayer</button></div></main>
   if (!isApproved) return <Blocked />
 
   return (

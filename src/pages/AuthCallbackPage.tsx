@@ -2,6 +2,7 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { getSafeReturnTo } from '../lib/navigation'
 import { supabase } from '../lib/supabase'
 
 export function AuthCallbackPage() {
@@ -12,7 +13,7 @@ export function AuthCallbackPage() {
   const [isResending, setIsResending] = useState(false)
   const [resendComplete, setResendComplete] = useState(false)
 
-  const returnTo = searchParams.get('returnTo') || '/'
+  const returnTo = getSafeReturnTo(searchParams.get('returnTo'))
 
   useEffect(() => {
     const finishAuthentication = async () => {

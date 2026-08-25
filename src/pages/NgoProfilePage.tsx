@@ -11,11 +11,13 @@ export function NgoProfilePage() {
   const { user } = useAuth()
   const [application, setApplication] = useState<NgoApplicationSnapshot | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     let isCurrent = true
     void getMyNgoApplication()
       .then((snapshot) => { if (isCurrent) setApplication(snapshot) })
+      .catch(() => { if (isCurrent) setLoadError(true) })
       .finally(() => { if (isCurrent) setIsLoading(false) })
     return () => { isCurrent = false }
   }, [])
@@ -26,6 +28,7 @@ export function NgoProfilePage() {
   }
 
   if (isLoading) return <div className="grid min-h-72 place-items-center"><span className="size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></div>
+  if (loadError) return <div className="grid min-h-72 place-items-center p-6 text-center"><div><h1 className="text-xl font-bold">Profil indisponible</h1><p className="mt-2 text-sm text-slate-500">Vérifiez votre connexion puis réessayez.</p><button className="mt-5 min-h-11 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={() => window.location.reload()} type="button">Réessayer</button></div></div>
 
   return (
     <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">

@@ -4,7 +4,6 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
-  ChevronRight,
   Clock3,
   Gauge,
   Heart,
@@ -18,7 +17,6 @@ import { AvatarStack } from '../components/AvatarStack'
 import { CancelRegistrationSheet } from '../components/CancelRegistrationSheet'
 import { JoinMissionSheet } from '../components/JoinMissionSheet'
 import { useAuth } from '../auth/auth-context'
-import { sampleMissions } from '../data/missions'
 import {
   getMissionBySlug,
   getMissionPrivateDetails,
@@ -64,24 +62,39 @@ export function MissionDetailsPage() {
   const [isJoinSheetOpen, setIsJoinSheetOpen] = useState(false)
   const [isCancelSheetOpen, setIsCancelSheetOpen] = useState(false)
   const [viewerState, setViewerState] = useState<MissionViewerContext & { key: string }>({ accountType: null, ownsMission: false, key: '' })
-  const fallbackMission = sampleMissions.find((item) => item.id === missionId) ?? null
-  const [mission, setMission] = useState<Mission | null>(fallbackMission)
-  const [isLoading, setIsLoading] = useState(!fallbackMission)
+  const [mission, setMission] = useState<Mission | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
+  const [viewerErrorKey, setViewerErrorKey] = useState('')
+  const [viewerAttempt, setViewerAttempt] = useState(0)
+  const [currentTime, setCurrentTime] = useState(() => Date.now())
   const [privateDetails, setPrivateDetails] = useState<MissionPrivateDetails | null>(null)
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setCurrentTime(Date.now()), 30_000)
+    return () => window.clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     if (!missionId) return
 
     let isCurrent = true
-
-    void getMissionBySlug(missionId)
+    void Promise.resolve()
+      .then(() => {
+        if (!isCurrent) return null
+        setIsLoading(true)
+        setLoadError(false)
+        return getMissionBySlug(missionId)
+      })
       .then((remoteMission) => {
         if (!isCurrent) return
-        setMission(remoteMission ?? fallbackMission)
+        setMission(remoteMission)
       })
       .catch(() => {
         if (!isCurrent) return
-        setMission(fallbackMission)
+        setMission(null)
+        setLoadError(true)
       })
       .finally(() => {
         if (isCurrent) setIsLoading(false)
@@ -90,20 +103,20 @@ export function MissionDetailsPage() {
     return () => {
       isCurrent = false
     }
-  }, [fallbackMission, missionId])
+  }, [loadAttempt, missionId])
 
   useEffect(() => {
     if (!user || !mission?.databaseId) return
 
     let isCurrent = true
     const viewerKey = `${user.id}:${mission.databaseId}`
-
     void getMissionViewerContext(mission.databaseId)
       .then(async (context) => {
         if (!isCurrent) return
         setIsJoined(false)
         setIsSaved(false)
         setPrivateDetails(null)
+        setViewerErrorKey('')
         setViewerState({ ...context, key: viewerKey })
 
         if (context.accountType === 'volunteer') {
@@ -123,10 +136,12 @@ export function MissionDetailsPage() {
           if (isCurrent) setPrivateDetails(details)
         }
       })
-      .catch(() => undefined)
+      .catch(() => {
+        if (isCurrent) setViewerErrorKey(viewerKey)
+      })
 
     return () => { isCurrent = false }
-  }, [mission?.databaseId, user])
+  }, [mission?.databaseId, user, viewerAttempt])
 
   const toggleSaved = async () => {
     if (!user) {
@@ -149,6 +164,19 @@ export function MissionDetailsPage() {
     return (
       <main className="grid min-h-dvh place-items-center bg-white">
         <span className="block size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" />
+      </main>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center">
+        <div>
+          <h1 className="text-2xl font-bold">Impossible de charger la mission</h1>
+          <p className="mt-2 text-sm text-slate-500">Vérifiez votre connexion puis réessayez.</p>
+          <button className="mt-6 min-h-12 rounded-full bg-sky-500 px-6 text-sm font-bold text-white" onClick={() => { setIsLoading(true); setLoadError(false); setLoadAttempt((attempt) => attempt + 1) }} type="button">Réessayer</button>
+          <Link className="mt-4 block text-sm font-semibold text-slate-600" to="/explore">Retour à Explorer</Link>
+        </div>
       </main>
     )
   }
@@ -177,13 +205,24 @@ export function MissionDetailsPage() {
       ? null
       : Math.max(mission.capacity - mission.registrationCount, 0)
   const currentViewerKey = user && mission.databaseId ? `${user.id}:${mission.databaseId}` : ''
+  const viewerError = Boolean(currentViewerKey && viewerErrorKey === currentViewerKey)
   const hasCurrentViewerContext = Boolean(user && viewerState.key === currentViewerKey)
   const viewerContext = hasCurrentViewerContext
     ? viewerState
     : { accountType: null, ownsMission: false, key: '' }
-  const isViewerContextLoading = Boolean(user && !hasCurrentViewerContext)
+  const isViewerContextLoading = Boolean(user && !hasCurrentViewerContext && !viewerError)
   const visiblePrivateDetails = hasCurrentViewerContext ? privateDetails : null
   const canVolunteerInteract = !user || viewerContext.accountType === 'volunteer'
+  const hasStarted = new Date(mission.startsAt).getTime() <= currentTime
+  const registrationClosed = new Date(mission.registrationDeadline).getTime() <= currentTime
+  const isFull = remainingPlaces === 0
+  const actionDisabled = hasStarted || (!isJoined && (registrationClosed || isFull))
+  const actionLabel = isJoined
+    ? hasStarted ? 'Mission commencée' : 'Gérer mon inscription'
+    : hasStarted ? 'Mission commencée'
+      : registrationClosed ? 'Inscriptions closes'
+        : isFull ? 'Mission complète'
+          : `Participer · ${mission.points} pts`
 
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md bg-white pb-28 text-slate-950 shadow-sm">
@@ -243,7 +282,7 @@ export function MissionDetailsPage() {
           {mission.title}
         </h1>
 
-        <button className="mt-4 flex w-full items-center gap-3 text-left" type="button">
+        <div className="mt-4 flex w-full items-center gap-3 text-left">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sky-100 font-bold text-sky-700">
             {mission.ngoName.slice(0, 1)}
           </span>
@@ -254,8 +293,7 @@ export function MissionDetailsPage() {
             </span>
             <span className="text-xs text-slate-500">Organisation vérifiée</span>
           </span>
-          <ChevronRight aria-hidden="true" className="text-slate-400" size={18} />
-        </button>
+        </div>
 
         <section className="mt-5 grid grid-cols-2 gap-2" aria-label="Informations principales">
           <InfoCard
@@ -362,6 +400,8 @@ export function MissionDetailsPage() {
       <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-md gap-2 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
         {isViewerContextLoading ? (
           <div className="grid min-h-12 flex-1 place-items-center"><span className="size-6 animate-spin rounded-full border-2 border-sky-100 border-t-sky-500" /></div>
+        ) : viewerError ? (
+          <button className="min-h-12 flex-1 rounded-full bg-rose-50 px-5 text-sm font-bold text-rose-700" onClick={() => { setViewerErrorKey(''); setViewerAttempt((attempt) => attempt + 1) }} type="button">Réessayer la vérification du compte</button>
         ) : viewerContext.accountType === 'ngo' ? (
           viewerContext.ownsMission && mission.databaseId ? <>
             <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700" to={`/ngo/missions/${mission.databaseId}/edit`}>Modifier la mission</Link>
@@ -380,11 +420,12 @@ export function MissionDetailsPage() {
             <span className="sr-only">Enregistrer</span>
           </button>
           <button
-            className={`min-h-12 flex-1 rounded-full px-5 text-sm font-bold shadow-sm transition ${
+            className={`min-h-12 flex-1 rounded-full px-5 text-sm font-bold shadow-sm transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 ${
               isJoined
                 ? 'bg-emerald-100 text-emerald-800'
                 : 'bg-sky-500 text-white hover:bg-sky-600'
             }`}
+            disabled={actionDisabled}
             onClick={() => {
               if (!user) {
                 navigate(`/auth?mode=signup&returnTo=${encodeURIComponent(`/missions/${mission.id}`)}`)
@@ -396,7 +437,7 @@ export function MissionDetailsPage() {
             }}
             type="button"
           >
-            {isJoined ? 'Gérer mon inscription' : `Participer · ${mission.points} pts`}
+            {actionLabel}
           </button>
         </>}
       </div>

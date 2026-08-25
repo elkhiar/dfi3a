@@ -1,6 +1,7 @@
 import { ArrowLeft, Building2, Check, Clock3, ExternalLink, LogOut, ShieldCheck, Siren, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/auth-context'
 import { supabase } from '../lib/supabase'
 import { getMyAccountType } from '../services/ngos'
 import {
@@ -17,12 +18,14 @@ type UrgencyQueueItem = Awaited<ReturnType<typeof getPendingUrgencyRequests>>[nu
 
 export function AdminPage() {
   const navigate = useNavigate()
+  const { isLoading: isAuthLoading, user } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<AdminTab>('ngos')
   const [ngos, setNgos] = useState<NgoQueueItem[]>([])
   const [urgencies, setUrgencies] = useState<UrgencyQueueItem[]>([])
   const [errorMessage, setErrorMessage] = useState('')
+  const [accessError, setAccessError] = useState(false)
 
   const loadQueues = async () => {
     const [ngoQueue, urgencyQueue] = await Promise.all([
@@ -34,6 +37,8 @@ export function AdminPage() {
   }
 
   useEffect(() => {
+    if (isAuthLoading) return
+    if (!user) return
     let isCurrent = true
     void getMyAccountType()
       .then(async (type) => {
@@ -41,13 +46,14 @@ export function AdminPage() {
         setIsAdmin(true)
         await loadQueues()
       })
-      .catch(() => undefined)
+      .catch(() => { if (isCurrent) setAccessError(true) })
       .finally(() => { if (isCurrent) setIsLoading(false) })
     return () => { isCurrent = false }
-  }, [])
+  }, [isAuthLoading, user])
 
-  if (isLoading) return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
-  if (!isAdmin) return <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center"><div><ShieldCheck className="mx-auto text-sky-500" size={34} /><h1 className="mt-4 text-2xl font-bold">Accès administrateur</h1><p className="mt-2 text-sm text-slate-500">Ce tableau de bord est réservé à l’équipe dfi3a.</p></div></main>
+  if (isAuthLoading || (user && isLoading)) return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
+  if (accessError) return <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center"><div><ShieldCheck className="mx-auto text-rose-500" size={34} /><h1 className="mt-4 text-2xl font-bold">Vérification impossible</h1><p className="mt-2 text-sm text-slate-500">Vérifiez votre connexion puis réessayez.</p><button className="mt-5 min-h-11 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={() => window.location.reload()} type="button">Réessayer</button></div></main>
+  if (!isAdmin) return <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center"><div><ShieldCheck className="mx-auto text-sky-500" size={34} /><h1 className="mt-4 text-2xl font-bold">Accès administrateur</h1><p className="mt-2 text-sm text-slate-500">Ce tableau de bord est réservé à l’équipe dfi3a.</p><button className="mt-6 min-h-12 rounded-full bg-sky-500 px-6 text-sm font-bold text-white" onClick={() => navigate('/auth?mode=login&returnTo=%2Fadmin')} type="button">Se connecter</button><button className="mt-3 block w-full text-sm font-semibold text-slate-500" onClick={() => navigate('/')} type="button">Retour à l’accueil</button></div></main>
 
   const reviewNgo = async (id: string, approved: boolean, reason = '') => {
     setErrorMessage('')
@@ -84,13 +90,25 @@ function NgoQueue({ items, onReview }: { items: NgoQueueItem[]; onReview: (id: s
   return <section className="mt-5 space-y-3">{items.map((item) => { const application = Array.isArray(item.ngo_applications) ? item.ngo_applications[0] : item.ngo_applications; return <article className="rounded-[22px] bg-white p-4 shadow-sm" key={item.id}><div className="flex items-start justify-between gap-3"><div><h2 className="font-bold">{item.name}</h2><p className="mt-1 text-xs text-slate-500">{item.main_city} · {application?.official_email}</p></div><span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">En attente</span></div><dl className="mt-4 grid grid-cols-2 gap-3 text-xs"><div><dt className="text-slate-400">Nom légal</dt><dd className="mt-1 font-semibold">{application?.legal_name}</dd></div><div><dt className="text-slate-400">N° enregistrement</dt><dd className="mt-1 font-semibold">{application?.registration_number}</dd></div></dl><button className="mt-4 flex items-center gap-1.5 text-xs font-bold text-sky-700" onClick={() => void openDocument(application?.registration_document_path)} type="button"><ExternalLink aria-hidden="true" size={14} />Voir le document</button><DecisionButtons id={item.id} onReview={onReview} /></article> })}</section>
 }
 
-async function openDocument(path?: string) { if (!path) return; const url = await getNgoDocumentUrl(path); window.open(url, '_blank', 'noopener,noreferrer') }
+async function openDocument(path?: string) { if (!path) return; try { const url = await getNgoDocumentUrl(path); window.open(url, '_blank', 'noopener,noreferrer') } catch { window.alert('Le document ne peut pas être ouvert pour le moment.') } }
 
 function UrgencyQueue({ items, onReview }: { items: UrgencyQueueItem[]; onReview: (id: string, approved: boolean, reason?: string) => Promise<void> }) {
   if (!items.length) return <Empty icon={Siren} text="Aucune demande urgente en attente." />
   return <section className="mt-5 space-y-3">{items.map((item) => { const ngo = Array.isArray(item.ngos) ? item.ngos[0] : item.ngos; return <article className="rounded-[22px] bg-white p-4 shadow-sm" key={item.id}><div className="flex items-start justify-between gap-3"><div><h2 className="font-bold">{item.title}</h2><p className="mt-1 text-xs text-slate-500">{ngo?.name}</p></div><Siren className="text-rose-500" size={20} /></div><p className="mt-4 rounded-[16px] bg-amber-50 p-3 text-sm leading-6 text-amber-950">{item.urgency_justification}</p><p className="mt-3 flex items-center gap-1 text-xs text-slate-500"><Clock3 aria-hidden="true" size={13} />Besoin avant {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.urgency_needed_by))}</p><DecisionButtons id={item.id} onReview={onReview} /></article> })}</section>
 }
 
-function DecisionButtons({ id, onReview }: { id: string; onReview: (id: string, approved: boolean, reason?: string) => Promise<void> }) { const [reason, setReason] = useState(''); return <div className="mt-4"><input className="min-h-11 w-full rounded-[14px] border border-slate-300 px-3 text-sm outline-none focus:border-sky-500" onChange={(event) => setReason(event.target.value)} placeholder="Motif facultatif ou raison du refus" value={reason} /><div className="mt-2 grid grid-cols-2 gap-2"><button className="flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-rose-200 text-sm font-bold text-rose-600" onClick={() => void onReview(id, false, reason)} type="button"><X aria-hidden="true" size={17} />Refuser</button><button className="flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-emerald-600 text-sm font-bold text-white" onClick={() => void onReview(id, true, reason)} type="button"><Check aria-hidden="true" size={17} />Approuver</button></div></div> }
+function DecisionButtons({ id, onReview }: { id: string; onReview: (id: string, approved: boolean, reason?: string) => Promise<void> }) {
+  const [reason, setReason] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [validationError, setValidationError] = useState('')
+  const decide = async (approved: boolean) => {
+    if (!approved && !reason.trim()) { setValidationError('Indiquez la raison du refus.'); return }
+    setValidationError('')
+    setIsSubmitting(true)
+    await onReview(id, approved, reason.trim())
+    setIsSubmitting(false)
+  }
+  return <div className="mt-4"><input className="min-h-11 w-full rounded-[14px] border border-slate-300 px-3 text-sm outline-none focus:border-sky-500" disabled={isSubmitting} onChange={(event) => setReason(event.target.value)} placeholder="Motif facultatif ou raison du refus" value={reason} />{validationError && <p className="mt-2 text-xs font-semibold text-rose-600" role="alert">{validationError}</p>}<div className="mt-2 grid grid-cols-2 gap-2"><button className="flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-rose-200 text-sm font-bold text-rose-600 disabled:opacity-50" disabled={isSubmitting} onClick={() => void decide(false)} type="button"><X aria-hidden="true" size={17} />Refuser</button><button className="flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-emerald-600 text-sm font-bold text-white disabled:opacity-50" disabled={isSubmitting} onClick={() => void decide(true)} type="button"><Check aria-hidden="true" size={17} />{isSubmitting ? 'Enregistrement…' : 'Approuver'}</button></div></div>
+}
 function Tab({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) { return <button aria-pressed={active} className={`min-h-11 rounded-full text-sm font-semibold ${active ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-500'}`} onClick={onClick} type="button">{children}</button> }
 function Empty({ icon: Icon, text }: { icon: typeof Building2; text: string }) { return <div className="mt-6 rounded-[22px] bg-white p-8 text-center"><Icon className="mx-auto text-sky-500" size={28} /><p className="mt-3 text-sm font-semibold">{text}</p></div> }

@@ -16,7 +16,7 @@ type Radius = 5 | 10 | 25 | 'all'
 const referenceLocation = { latitude: 33.5799, longitude: -7.6133 }
 
 function distanceInKm(mission: Mission) {
-  if (mission.approximateLatitude == null || mission.approximateLongitude == null) return 0
+  if (mission.approximateLatitude == null || mission.approximateLongitude == null) return Number.POSITIVE_INFINITY
 
   const toRadians = (degrees: number) => (degrees * Math.PI) / 180
   const latitudeDelta = toRadians(mission.approximateLatitude - referenceLocation.latitude)
@@ -66,12 +66,23 @@ export function ExplorePage() {
   })
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
 
   useEffect(() => {
+    let isCurrent = true
     void getPublicMissions()
-      .then(setMissions)
-      .finally(() => setIsLoading(false))
-  }, [])
+      .then((nextMissions) => {
+        if (isCurrent) setMissions(nextMissions)
+      })
+      .catch(() => {
+        if (isCurrent) setLoadError(true)
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false)
+      })
+    return () => { isCurrent = false }
+  }, [loadAttempt])
 
   useEffect(() => {
     if (!user) return
@@ -97,6 +108,9 @@ export function ExplorePage() {
       return true
     })
   }, [category, missions, query, radius, urgentOnly])
+  const visibleSelectedMission = selectedMission && filteredMissions.some((mission) => mission.id === selectedMission.id)
+    ? selectedMission
+    : null
 
   const updateSaved = async (mission: Mission, saved: boolean) => {
     if (!user) {
@@ -192,6 +206,11 @@ export function ExplorePage() {
         <div className="grid min-h-72 place-items-center">
           <span className="block size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" />
         </div>
+      ) : loadError ? (
+        <div className="mt-6 rounded-[22px] bg-rose-50 p-8 text-center">
+          <p className="font-bold text-rose-800">Impossible de charger les missions</p>
+          <button className="mt-4 min-h-11 rounded-full bg-white px-5 text-sm font-bold text-rose-700 shadow-sm" onClick={() => { setIsLoading(true); setLoadError(false); setLoadAttempt((attempt) => attempt + 1) }} type="button">Réessayer</button>
+        </div>
       ) : filteredMissions.length === 0 ? (
         <div className="mt-6 rounded-[22px] bg-slate-50 p-8 text-center">
           <p className="font-bold">Aucune mission trouvée</p>
@@ -211,8 +230,9 @@ export function ExplorePage() {
       ) : (
         <MissionMap
           missions={filteredMissions}
+          onOpen={(mission) => navigate(`/missions/${mission.id}`)}
           onSelect={setSelectedMission}
-          selectedMission={selectedMission}
+          selectedMission={visibleSelectedMission}
         />
       )}
     </div>
@@ -239,8 +259,9 @@ function TabButton({ active, children, icon: Icon, onClick }: {
   )
 }
 
-function MissionMap({ missions, onSelect, selectedMission }: {
+function MissionMap({ missions, onOpen, onSelect, selectedMission }: {
   missions: Mission[]
+  onOpen: (mission: Mission) => void
   onSelect: (mission: Mission) => void
   selectedMission: Mission | null
 }) {
@@ -279,7 +300,7 @@ function MissionMap({ missions, onSelect, selectedMission }: {
       {selectedMission && (
         <button
           className="absolute inset-x-3 bottom-3 flex gap-3 rounded-[18px] bg-white p-3 text-left shadow-lg"
-          onClick={() => (window.location.href = `/missions/${selectedMission.id}`)}
+          onClick={() => onOpen(selectedMission)}
           type="button"
         >
           <img alt="" className="size-16 rounded-[14px] object-cover" src={selectedMission.coverImageUrl} />

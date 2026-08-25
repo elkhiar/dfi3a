@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { getSafeReturnTo } from '../lib/navigation'
 import { supabase } from '../lib/supabase'
 
 export function ResetPasswordPage() {
@@ -12,7 +13,7 @@ export function ResetPasswordPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
-  const returnTo = searchParams.get('returnTo') || '/'
+  const returnTo = getSafeReturnTo(searchParams.get('returnTo'))
 
   const updatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

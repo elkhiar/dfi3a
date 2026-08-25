@@ -2,6 +2,7 @@ import { ArrowLeft, CheckCircle2, KeyRound } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { getSafeReturnTo } from '../lib/navigation'
 import { supabase } from '../lib/supabase'
 
 export function ForgotPasswordPage() {
@@ -11,7 +12,7 @@ export function ForgotPasswordPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSent, setIsSent] = useState(false)
-  const returnTo = searchParams.get('returnTo') || '/'
+  const returnTo = getSafeReturnTo(searchParams.get('returnTo'))
 
   const sendResetEmail = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

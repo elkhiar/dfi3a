@@ -83,7 +83,10 @@ export async function getMissionViewerContext(missionId: string): Promise<Missio
 export async function getPublicMissions(): Promise<Mission[]> {
   const { data, error } = await supabase.rpc('get_public_missions')
   if (error) throw error
-  return (data ?? []).map((row: Record<string, any>) => mapMission(row))
+  const now = Date.now()
+  return (data ?? [])
+    .map((row: Record<string, any>) => mapMission(row))
+    .filter((mission: Mission) => new Date(mission.endsAt).getTime() > now)
 }
 
 export async function setMissionSaved(missionId: string, saved: boolean) {
@@ -171,6 +174,7 @@ export async function getMyJoinedMissions(): Promise<Mission[]> {
 
   return missions
     .filter((mission): mission is Mission => mission !== null)
+    .filter((mission) => new Date(mission.endsAt).getTime() > Date.now())
     .sort(
       (first, second) =>
         new Date(first.startsAt).getTime() - new Date(second.startsAt).getTime(),

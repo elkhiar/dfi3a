@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { getSafeReturnTo } from '../lib/navigation'
 import { supabase } from '../lib/supabase'
 
 type AuthMode = 'login' | 'signup'
@@ -12,7 +13,7 @@ export function AuthPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login'
-  const returnTo = searchParams.get('returnTo') || '/'
+  const returnTo = getSafeReturnTo(searchParams.get('returnTo'))
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)

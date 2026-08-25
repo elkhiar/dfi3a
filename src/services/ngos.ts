@@ -25,6 +25,7 @@ export type NgoApplicationInput = {
 
 export async function getMyAccountType() {
   const { data: authData, error: authError } = await supabase.auth.getUser()
+  if (authError?.name === 'AuthSessionMissingError') return null
   if (authError) throw authError
   if (!authData.user) return null
 
@@ -72,6 +73,11 @@ export async function uploadNgoDocument(userId: string, file: File) {
   const { error } = await supabase.storage.from('ngo-documents').upload(path, file)
   if (error) throw error
   return path
+}
+
+export async function deleteNgoDocument(path: string) {
+  const { error } = await supabase.storage.from('ngo-documents').remove([path])
+  if (error) throw error
 }
 
 export async function submitNgoApplication(input: NgoApplicationInput) {
@@ -160,6 +166,15 @@ export async function uploadMissionImage(userId: string, file: File) {
   const { error } = await supabase.storage.from('mission-images').upload(path, file)
   if (error) throw error
   return supabase.storage.from('mission-images').getPublicUrl(path).data.publicUrl
+}
+
+export async function deleteMissionImage(publicUrl: string) {
+  const marker = '/storage/v1/object/public/mission-images/'
+  const markerIndex = publicUrl.indexOf(marker)
+  if (markerIndex < 0) return
+  const path = decodeURIComponent(publicUrl.slice(markerIndex + marker.length))
+  const { error } = await supabase.storage.from('mission-images').remove([path])
+  if (error) throw error
 }
 
 export async function createNgoMission(input: NgoMissionInput) {

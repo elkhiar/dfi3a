@@ -6,6 +6,7 @@ import { useAuth } from '../auth/auth-context'
 import { AddressAutocomplete } from '../components/AddressAutocomplete'
 import type { AddressSelection } from '../components/AddressAutocomplete'
 import {
+  deleteMissionImage,
   getMissionFormOptions,
   getNgoMissionForEdit,
   updateNgoMission,
@@ -29,7 +30,7 @@ function toLocalDateTime(value: string) {
 }
 
 function approximateLocation(latitude: number, longitude: number) {
-  const distanceMeters = 35 + Math.random() * 45
+  const distanceMeters = 60 + Math.random() * 40
   const angle = Math.random() * Math.PI * 2
   return {
     latitude: latitude + (distanceMeters * Math.cos(angle)) / 111_320,
@@ -121,14 +122,19 @@ export function NgoMissionEditPage() {
     const end = new Date(endsAt)
     const deadline = new Date(registrationDeadline)
     if (end <= start) { setErrorMessage('La fin doit être postérieure au début.'); return }
-    if (deadline > start) { setErrorMessage('La date limite doit précéder le début de la mission.'); return }
+    if (start <= new Date()) { setErrorMessage('Le début de la mission doit rester dans le futur.'); return }
+    if (deadline >= start) { setErrorMessage('La date limite doit précéder le début de la mission.'); return }
+    if (!unlimitedCapacity && (!Number.isInteger(Number(capacity)) || Number(capacity) < 1)) { setErrorMessage('Le nombre de places doit être un entier supérieur à zéro.'); return }
     if (difficulty !== 'standard' && !difficultyJustification.trim()) { setErrorMessage('Justifiez le niveau de difficulté choisi.'); return }
+    if (image && (image.size > 8 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(image.type))) { setErrorMessage('L’image doit être un fichier JPG, PNG ou WebP de 8 Mo maximum.'); return }
 
     setIsSubmitting(true)
     setErrorMessage('')
+    let uploadedImageUrl = ''
     try {
       const approximate = approximateLocation(address.latitude, address.longitude)
       const coverImagePath = image ? await uploadMissionImage(user.id, image) : null
+      if (coverImagePath) uploadedImageUrl = coverImagePath
       const result = await updateNgoMission({
         id: mission.id,
         categorySlug,
@@ -156,6 +162,7 @@ export function NgoMissionEditPage() {
       })
       navigate(`/missions/${result.mission_slug}`, { replace: true })
     } catch (error) {
+      if (uploadedImageUrl) void deleteMissionImage(uploadedImageUrl).catch(() => undefined)
       const message = typeof error === 'object' && error && 'message' in error ? String(error.message) : ''
       setErrorMessage(message || 'La mission n’a pas pu être modifiée.')
     } finally {

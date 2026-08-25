@@ -12,28 +12,32 @@ export function NgoDashboardPage() {
   const [application, setApplication] = useState<NgoApplicationSnapshot | null>(null)
   const [missions, setMissions] = useState<NgoMissionRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     if (!user) return
     let isCurrent = true
 
-    void Promise.all([getMyAccountType(), getMyNgoApplication()]).then(async ([type, snapshot]) => {
-      if (!isCurrent) return
-      if (type !== 'ngo' || snapshot?.status !== 'approved') {
+    void Promise.all([getMyAccountType(), getMyNgoApplication()])
+      .then(async ([type, snapshot]) => {
+        if (!isCurrent) return
+        if (type !== 'ngo' || snapshot?.status !== 'approved') {
+          setApplication(snapshot)
+          return
+        }
         setApplication(snapshot)
-        setIsLoading(false)
-        return
-      }
-      setApplication(snapshot)
-      setMissions(await getMyNgoMissions())
-      if (isCurrent) setIsLoading(false)
-    })
+        const nextMissions = await getMyNgoMissions()
+        if (isCurrent) setMissions(nextMissions)
+      })
+      .catch(() => { if (isCurrent) setErrorMessage('Impossible de charger votre espace ONG.') })
+      .finally(() => { if (isCurrent) setIsLoading(false) })
 
     return () => { isCurrent = false }
   }, [user])
 
   if (!isAuthLoading && !user) return <AccessCard />
   if (isAuthLoading || isLoading) return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
+  if (errorMessage) return <main className="grid min-h-dvh place-items-center bg-white p-6 text-center"><div><h1 className="text-xl font-bold">Chargement impossible</h1><p className="mt-2 text-sm text-slate-500">{errorMessage}</p><button className="mt-5 min-h-11 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={() => window.location.reload()} type="button">Réessayer</button></div></main>
   if (!application || application.status !== 'approved') return <AccessCard />
 
   return (

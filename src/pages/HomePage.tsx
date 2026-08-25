@@ -1,9 +1,8 @@
-import { Bell, ChevronDown } from 'lucide-react'
+import { Bell, MapPin } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { MissionCard } from '../components/MissionCard'
-import { sampleMissions } from '../data/missions'
 import {
   getMySavedMissionIds,
   getPublicMissions,
@@ -12,20 +11,32 @@ import {
 import { getMyPointsSummary } from '../services/profiles'
 import type { Mission } from '../types/mission'
 
-const sections = ['Environnement', 'Santé']
-
 export function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [activeCategory, setActiveCategory] = useState('Tout')
-  const [missions, setMissions] = useState<Mission[]>(sampleMissions)
+  const [missions, setMissions] = useState<Mission[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [savedMissionIds, setSavedMissionIds] = useState<Set<string>>(new Set())
   const [totalPoints, setTotalPoints] = useState(0)
   const urgentMissions = missions.filter((mission) => mission.isUrgent)
 
   useEffect(() => {
-    void getPublicMissions().then(setMissions).catch(() => undefined)
-  }, [])
+    let isCurrent = true
+    void getPublicMissions()
+      .then((nextMissions) => {
+        if (isCurrent) setMissions(nextMissions)
+      })
+      .catch(() => {
+        if (isCurrent) setLoadError(true)
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false)
+      })
+    return () => { isCurrent = false }
+  }, [loadAttempt])
 
   useEffect(() => {
     if (!user) return
@@ -44,15 +55,21 @@ export function HomePage() {
       counts.set(mission.category, (counts.get(mission.category) ?? 0) + 1)
     }
 
+    const remainingCategories = Array.from(counts.keys())
+      .filter((name) => !preferredOrder.includes(name))
+      .sort((first, second) => first.localeCompare(second, 'fr'))
+
     return [
       { name: 'Tout', count: missions.length },
-      ...preferredOrder
+      ...[...preferredOrder, ...remainingCategories]
         .filter((name) => counts.has(name))
         .map((name) => ({ name, count: counts.get(name) ?? 0 })),
     ]
   }, [missions])
 
-  const visibleSections = activeCategory === 'Tout' ? sections : [activeCategory]
+  const visibleSections = activeCategory === 'Tout'
+    ? homeCategories.filter((category) => category.name !== 'Tout').map((category) => category.name)
+    : [activeCategory]
 
   const updateSaved = async (mission: Mission, saved: boolean) => {
     if (!user) {
@@ -84,13 +101,13 @@ export function HomePage() {
   return (
     <div className="overflow-hidden">
       <header className="flex items-center justify-between gap-4 pt-3">
-        <button
+        <Link
           className="flex min-w-0 min-h-11 items-center gap-1 rounded-lg text-left text-base font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
-          type="button"
+          to="/explore"
         >
+          <MapPin aria-hidden="true" className="shrink-0 text-sky-500" size={17} />
           <span className="truncate">Mers Sultan</span>
-          <ChevronDown aria-hidden="true" size={17} strokeWidth={2.5} />
-        </button>
+        </Link>
 
         <div className="flex h-11 items-center rounded-full border border-slate-700 bg-white pl-3 pr-1.5">
           <span className="mr-2 text-sm text-slate-600">
@@ -98,7 +115,9 @@ export function HomePage() {
           </span>
           <button
             aria-label="Notifications"
-            className="grid size-9 place-items-center rounded-full text-slate-600 hover:bg-slate-100"
+            className="grid size-9 cursor-not-allowed place-items-center rounded-full text-slate-300"
+            disabled
+            title="Notifications bientôt disponibles"
             type="button"
           >
             <Bell aria-hidden="true" size={20} />
@@ -123,16 +142,25 @@ export function HomePage() {
             Voir tout
           </Link>
         </div>
-        <div className="scrollbar-none -mr-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pr-4">
+        {isLoading ? (
+          <div className="grid min-h-40 place-items-center"><span className="size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></div>
+        ) : loadError ? (
+          <div className="rounded-[22px] bg-rose-50 p-5 text-center">
+            <p className="text-sm font-bold text-rose-800">Impossible de charger les missions</p>
+            <button className="mt-3 min-h-11 rounded-full bg-white px-5 text-sm font-bold text-rose-700 shadow-sm" onClick={() => { setIsLoading(true); setLoadError(false); setLoadAttempt((attempt) => attempt + 1) }} type="button">Réessayer</button>
+          </div>
+        ) : urgentMissions.length === 0 ? (
+          <div className="rounded-[22px] bg-slate-50 p-5 text-center text-sm text-slate-500">Aucune mission urgente pour le moment.</div>
+        ) : <div className="scrollbar-none -mr-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pr-4">
           {urgentMissions.map((mission) => (
             <div className="snap-start" key={mission.id}>
               <MissionCard mission={mission} variant="urgent" />
             </div>
           ))}
-        </div>
+        </div>}
       </section>
 
-      <div className="scrollbar-none -mr-4 mt-5 flex gap-1.5 overflow-x-auto pr-4 pb-1">
+      {!loadError && !isLoading && <div className="scrollbar-none -mr-4 mt-5 flex gap-1.5 overflow-x-auto pr-4 pb-1">
         {homeCategories.map((category) => {
           const isActive = activeCategory === category.name
 
@@ -155,11 +183,11 @@ export function HomePage() {
             </button>
           )
         })}
-      </div>
+      </div>}
 
-      {visibleSections.map((section) => {
+      {!loadError && !isLoading && visibleSections.map((section) => {
         const sectionMissions = missions
-          .filter((mission) => !mission.isUrgent && mission.category === section)
+          .filter((mission) => mission.category === section && (activeCategory !== 'Tout' || !mission.isUrgent))
           .slice(0, 2)
 
         if (sectionMissions.length === 0) return null

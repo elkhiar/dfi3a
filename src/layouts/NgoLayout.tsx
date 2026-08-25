@@ -1,8 +1,6 @@
 import { CalendarDays, Home, Plus, Trophy, UserRound } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { Navigate, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
-import { getMyAccountType } from '../services/ngos'
 
 const navigation = [
   { label: 'Accueil', to: '/ngo/dashboard', icon: Home },
@@ -13,22 +11,13 @@ const navigation = [
 ]
 
 export function NgoLayout() {
-  const { user, isLoading: isAuthLoading } = useAuth()
-  const [role, setRole] = useState<{ accountType: 'volunteer' | 'ngo' | 'admin' | null; userId: string }>({ accountType: null, userId: '' })
+  const { accountType, accountTypeError, isAccountTypeLoading, isLoading: isAuthLoading, retryAccountType, user } = useAuth()
 
-  useEffect(() => {
-    let isCurrent = true
-    if (!user) return
-    void getMyAccountType()
-      .then((accountType) => { if (isCurrent) setRole({ accountType, userId: user.id }) })
-    return () => { isCurrent = false }
-  }, [user])
-
-  if (isAuthLoading || (user && role.userId !== user.id)) {
+  if (isAuthLoading || (user && isAccountTypeLoading)) {
     return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
   }
   if (!user) return <Navigate replace to="/auth?mode=login&returnTo=%2Fngo%2Fdashboard" />
-  const accountType = role.accountType
+  if (accountTypeError) return <main className="grid min-h-dvh place-items-center bg-white p-6 text-center"><div><h1 className="text-xl font-bold">Impossible de vérifier votre compte</h1><p className="mt-2 text-sm text-slate-500">Vérifiez votre connexion puis réessayez.</p><button className="mt-5 min-h-11 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={retryAccountType} type="button">Réessayer</button></div></main>
   if (accountType === 'admin') return <Navigate replace to="/admin" />
   if (accountType !== 'ngo') return <Navigate replace to="/" />
 

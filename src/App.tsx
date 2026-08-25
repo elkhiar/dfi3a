@@ -1,27 +1,30 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { AdminPage } from './pages/AdminPage'
 import { VolunteerLayout } from './layouts/VolunteerLayout'
 import { NgoLayout } from './layouts/NgoLayout'
-import { ExplorePage } from './pages/ExplorePage'
-import { AuthCallbackPage } from './pages/AuthCallbackPage'
-import { AuthPage } from './pages/AuthPage'
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
-import { HomePage } from './pages/HomePage'
-import { LeaderboardPage } from './pages/LeaderboardPage'
-import { MyEventsPage } from './pages/MyEventsPage'
-import { MissionDetailsPage } from './pages/MissionDetailsPage'
-import { NgoApplyPage } from './pages/NgoApplyPage'
-import { NgoDashboardPage } from './pages/NgoDashboardPage'
-import { NgoMissionCreatePage } from './pages/NgoMissionCreatePage'
-import { NgoMissionEditPage } from './pages/NgoMissionEditPage'
-import { NgoMissionsPage } from './pages/NgoMissionsPage'
-import { NgoProfilePage } from './pages/NgoProfilePage'
-import { NgoAttendancePage } from './pages/NgoAttendancePage'
-import { ProfilePage } from './pages/ProfilePage'
-import { ResetPasswordPage } from './pages/ResetPasswordPage'
+
+const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })))
+const ExplorePage = lazy(() => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage })))
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then((module) => ({ default: module.AuthCallbackPage })))
+const AuthPage = lazy(() => import('./pages/AuthPage').then((module) => ({ default: module.AuthPage })))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((module) => ({ default: module.ForgotPasswordPage })))
+const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage').then((module) => ({ default: module.LeaderboardPage })))
+const MyEventsPage = lazy(() => import('./pages/MyEventsPage').then((module) => ({ default: module.MyEventsPage })))
+const MissionDetailsPage = lazy(() => import('./pages/MissionDetailsPage').then((module) => ({ default: module.MissionDetailsPage })))
+const NgoApplyPage = lazy(() => import('./pages/NgoApplyPage').then((module) => ({ default: module.NgoApplyPage })))
+const NgoDashboardPage = lazy(() => import('./pages/NgoDashboardPage').then((module) => ({ default: module.NgoDashboardPage })))
+const NgoMissionCreatePage = lazy(() => import('./pages/NgoMissionCreatePage').then((module) => ({ default: module.NgoMissionCreatePage })))
+const NgoMissionEditPage = lazy(() => import('./pages/NgoMissionEditPage').then((module) => ({ default: module.NgoMissionEditPage })))
+const NgoMissionsPage = lazy(() => import('./pages/NgoMissionsPage').then((module) => ({ default: module.NgoMissionsPage })))
+const NgoProfilePage = lazy(() => import('./pages/NgoProfilePage').then((module) => ({ default: module.NgoProfilePage })))
+const NgoAttendancePage = lazy(() => import('./pages/NgoAttendancePage').then((module) => ({ default: module.NgoAttendancePage })))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((module) => ({ default: module.ResetPasswordPage })))
 
 export default function App() {
   return (
+    <Suspense fallback={<main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>}>
     <Routes>
       <Route element={<VolunteerLayout />}>
         <Route index element={<HomePage />} />
@@ -48,5 +51,6 @@ export default function App() {
       <Route path="admin" element={<AdminPage />} />
       <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>
+    </Suspense>
   )
 }

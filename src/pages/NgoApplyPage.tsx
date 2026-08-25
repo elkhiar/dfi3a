@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import {
   getMyAccountType,
   getMyNgoApplication,
+  deleteNgoDocument,
   submitNgoApplication,
   uploadNgoDocument,
 } from '../services/ngos'
@@ -20,18 +21,21 @@ export function NgoApplyPage() {
   const [accountType, setAccountType] = useState<AccountType>(null)
   const [application, setApplication] = useState<NgoApplicationSnapshot | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     if (isAuthLoading) return
     if (!user) return
 
     let isCurrent = true
-    void getMyAccountType().then(async (type) => {
-      if (!isCurrent) return
-      setAccountType(type)
-      if (type === 'ngo') setApplication(await getMyNgoApplication())
-      if (isCurrent) setIsLoading(false)
-    })
+    void getMyAccountType()
+      .then(async (type) => {
+        if (!isCurrent) return
+        setAccountType(type)
+        if (type === 'ngo') setApplication(await getMyNgoApplication())
+      })
+      .catch(() => { if (isCurrent) setLoadError(true) })
+      .finally(() => { if (isCurrent) setIsLoading(false) })
 
     return () => {
       isCurrent = false
@@ -47,6 +51,8 @@ export function NgoApplyPage() {
   if (isLoading) {
     return <main className="grid min-h-dvh place-items-center bg-white"><span className="block size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
   }
+
+  if (loadError) return <CenteredCard icon={ShieldAlert} title="Chargement impossible"><p className="mt-2 text-sm leading-6 text-slate-600">Vérifiez votre connexion puis réessayez.</p><button className="mt-6 min-h-12 w-full rounded-full bg-sky-500 text-sm font-bold text-white" onClick={() => window.location.reload()} type="button">Réessayer</button></CenteredCard>
 
   if (accountType !== 'ngo') {
     return (
@@ -164,13 +170,19 @@ function NgoApplicationForm({ onSubmitted, userId }: { onSubmitted: (application
       setErrorMessage('Ajoutez le document d’enregistrement de l’association.')
       return
     }
+    if (document.size > 5 * 1024 * 1024 || !['application/pdf', 'image/jpeg', 'image/png'].includes(document.type)) {
+      setErrorMessage('Le document doit être un PDF, JPG ou PNG de 5 Mo maximum.')
+      return
+    }
 
     setIsSubmitting(true)
     setErrorMessage('')
     const form = new FormData(event.currentTarget)
+    let uploadedDocumentPath = ''
 
     try {
       const documentPath = await uploadNgoDocument(userId, document)
+      uploadedDocumentPath = documentPath
       const values = (name: string) => String(form.get(name) || '').trim()
       const result = await submitNgoApplication({
         name: values('name'), description: values('description'), mainCity: values('mainCity'),
@@ -181,6 +193,7 @@ function NgoApplicationForm({ onSubmitted, userId }: { onSubmitted: (application
       })
       onSubmitted({ id: result.ngo_id, name: values('name'), description: values('description'), mainCity: values('mainCity'), status: 'pending', submittedAt: new Date().toISOString(), rejectionReason: null })
     } catch (error) {
+      if (uploadedDocumentPath) void deleteNgoDocument(uploadedDocumentPath).catch(() => undefined)
       const message =
         typeof error === 'object' && error !== null && 'message' in error
           ? String(error.message)
