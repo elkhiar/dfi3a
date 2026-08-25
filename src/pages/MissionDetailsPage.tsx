@@ -117,7 +117,6 @@ export function MissionDetailsPage() {
         setIsSaved(false)
         setPrivateDetails(null)
         setViewerErrorKey('')
-        setViewerState({ ...context, key: viewerKey })
 
         if (context.accountType === 'volunteer') {
           const [registration, savedIds] = await Promise.all([
@@ -129,12 +128,16 @@ export function MissionDetailsPage() {
           if (registration) {
             setIsJoined(true)
             const details = await getMissionPrivateDetails(mission.databaseId!)
-            if (isCurrent) setPrivateDetails(details)
+            if (!isCurrent) return
+            setPrivateDetails(details)
           }
         } else if (context.accountType === 'ngo' && context.ownsMission) {
           const details = await getMissionPrivateDetails(mission.databaseId!)
-          if (isCurrent) setPrivateDetails(details)
+          if (!isCurrent) return
+          setPrivateDetails(details)
         }
+
+        if (isCurrent) setViewerState({ ...context, key: viewerKey })
       })
       .catch(() => {
         if (isCurrent) setViewerErrorKey(viewerKey)
@@ -376,7 +379,7 @@ export function MissionDetailsPage() {
                 {mission.registrationCount}{' '}
                 {mission.registrationCount === 1 ? 'bénévole inscrit' : 'bénévoles inscrits'}
               </p>
-              <p className="mt-0.5 text-xs text-slate-500">{canVolunteerInteract ? 'Rejoignez cette équipe solidaire' : 'Inscriptions enregistrées pour cette mission'}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{isJoined ? 'Vous participez à cette mission' : canVolunteerInteract ? 'Rejoignez cette équipe solidaire' : 'Inscriptions enregistrées pour cette mission'}</p>
             </div>
             <div className="rounded-full bg-slate-700 px-2 py-1.5">
               <AvatarStack count={mission.registrationCount} />
