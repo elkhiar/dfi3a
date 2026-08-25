@@ -52,7 +52,7 @@ export function MissionCard({
     <article
       className={`group relative isolate shrink-0 overflow-hidden bg-slate-900 text-white shadow-sm ${
         isUrgent
-          ? 'h-[154px] w-[260px] rounded-[20px]'
+          ? 'h-[236px] w-[calc(100vw-3.5rem)] max-w-[372px] rounded-[26px] shadow-md'
           : 'aspect-[0.88] w-full rounded-[22px]'
       }`}
     >
@@ -61,16 +61,16 @@ export function MissionCard({
         className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.02]"
         src={mission.coverImageUrl}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/90" />
+      <div className={`absolute inset-0 ${isUrgent ? 'bg-gradient-to-b from-black/15 via-black/5 to-black/90' : 'bg-gradient-to-b from-black/10 via-black/5 to-black/90'}`} />
       <Link
         aria-label={`Voir la mission ${mission.title}`}
         className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white"
         to={`/missions/${mission.id}`}
       />
 
-      <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
+      <div className={`absolute inset-x-0 top-0 flex items-start justify-between ${isUrgent ? 'p-3.5' : 'p-2.5'}`}>
         {isUrgent ? (
-          <span className="rounded-full bg-rose-500 px-2 py-1 text-[9px] font-bold uppercase tracking-wide">
+          <span className="rounded-full bg-rose-500 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide shadow-sm">
             Urgent
           </span>
         ) : (
@@ -80,7 +80,7 @@ export function MissionCard({
         )}
 
         {isUrgent ? (
-          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-800 shadow-sm">
+          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm">
             {mission.points} <span className="text-sky-500">✦</span>
           </span>
         ) : (
@@ -100,7 +100,7 @@ export function MissionCard({
         )}
       </div>
 
-      <div className={`absolute inset-x-0 bottom-0 ${isUrgent ? 'p-3' : 'p-2.5'}`}>
+      <div className={`absolute inset-x-0 bottom-0 ${isUrgent ? 'p-4' : 'p-2.5'}`}>
         {!isUrgent && (
           <span
             className={`mb-1 inline-flex rounded-full px-2 py-0.5 text-[8px] font-semibold ${
@@ -113,18 +113,18 @@ export function MissionCard({
 
         <h3
           className={`font-semibold leading-[0.98] tracking-[-0.02em] ${
-            isUrgent ? 'max-w-[210px] text-xl' : 'line-clamp-2 text-base'
+            isUrgent ? 'line-clamp-2 max-w-[300px] text-[25px] leading-[0.95]' : 'line-clamp-2 text-base'
           }`}
         >
           {mission.title}
         </h3>
 
-        <p className="mt-1 flex items-center gap-1 truncate text-[9px] text-white/85">
-          <MapPin aria-hidden="true" className="shrink-0" size={10} />
+        <p className={`flex items-center gap-1 truncate text-white/85 ${isUrgent ? 'mt-2 text-[11px]' : 'mt-1 text-[9px]'}`}>
+          <MapPin aria-hidden="true" className="shrink-0" size={isUrgent ? 12 : 10} />
           {mission.generalArea}, {mission.city}
         </p>
-        <p className="mt-0.5 flex items-center gap-1 text-[9px] font-medium text-sky-300">
-          <CalendarDays aria-hidden="true" size={10} />
+        <p className={`mt-0.5 flex items-center gap-1 font-medium text-sky-300 ${isUrgent ? 'text-[11px]' : 'text-[9px]'}`}>
+          <CalendarDays aria-hidden="true" size={isUrgent ? 12 : 10} />
           {formatMissionDate(mission.startsAt)}
         </p>
 
@@ -141,7 +141,13 @@ export function MissionCard({
         )}
 
         {isUrgent && (
-          <div className="absolute bottom-3 right-3">
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/20 pt-2.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-white text-[9px] font-bold text-sky-700">
+                {mission.ngoName.slice(0, 1)}
+              </span>
+              <span className="truncate text-[10px] text-white/90">{mission.ngoName}</span>
+            </div>
             <AvatarStack count={mission.registrationCount} />
           </div>
         )}

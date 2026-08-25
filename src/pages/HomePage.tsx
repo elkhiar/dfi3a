@@ -151,9 +151,9 @@ export function HomePage() {
           </div>
         ) : urgentMissions.length === 0 ? (
           <div className="rounded-[22px] bg-slate-50 p-5 text-center text-sm text-slate-500">Aucune mission urgente pour le moment.</div>
-        ) : <div className="scrollbar-none -mr-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pr-4">
+        ) : <div className="scrollbar-none -mr-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pr-4">
           {urgentMissions.map((mission) => (
-            <div className="snap-start" key={mission.id}>
+            <div className="snap-start snap-always" key={mission.id}>
               <MissionCard mission={mission} variant="urgent" />
             </div>
           ))}
