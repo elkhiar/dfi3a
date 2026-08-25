@@ -6,6 +6,7 @@ import { useAuth } from '../auth/auth-context'
 import { AddressAutocomplete } from '../components/AddressAutocomplete'
 import type { AddressSelection } from '../components/AddressAutocomplete'
 import { getCategoryIllustrationPath } from '../lib/category-illustrations'
+import { parseMoroccoDateTimeInput } from '../lib/date-time'
 import { createNgoMission, deleteMissionImage, getMissionFormOptions, getMyNgoApplication, uploadMissionImage } from '../services/ngos'
 
 type Option = { slug: string; name_fr: string }
@@ -50,8 +51,8 @@ const accessibilityOptions = [
 ]
 
 function calculateDurationMinutes(startsAt: string, endsAt: string) {
-  const start = new Date(startsAt)
-  const end = new Date(endsAt)
+  const start = parseMoroccoDateTimeInput(startsAt)
+  const end = parseMoroccoDateTimeInput(endsAt)
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) return null
   return Math.round((end.getTime() - start.getTime()) / 60_000)
 }
@@ -197,10 +198,10 @@ export function NgoMissionCreatePage() {
       const description = value('description')
       const summary = description.replace(/\s+/g, ' ').slice(0, 180)
       const approximate = approximateLocation(address.latitude, address.longitude)
-      const startsAt = new Date(startsAtValue)
-      const endsAt = new Date(endsAtValue)
+      const startsAt = parseMoroccoDateTimeInput(startsAtValue)
+      const endsAt = parseMoroccoDateTimeInput(endsAtValue)
       const registrationDeadline = registrationDeadlinePreset === 'custom'
-        ? new Date(value('registrationDeadline'))
+        ? parseMoroccoDateTimeInput(value('registrationDeadline'))
         : new Date(startsAt.getTime() - ({ '30m': 30, '1h': 60, '24h': 1_440 }[registrationDeadlinePreset] * 60_000))
 
       if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || calculatedDurationMinutes == null) {
@@ -229,7 +230,7 @@ export function NgoMissionCreatePage() {
         return
       }
       if (requestUrgent) {
-        const urgencyNeededAt = new Date(value('urgencyNeededBy'))
+        const urgencyNeededAt = parseMoroccoDateTimeInput(value('urgencyNeededBy'))
         if (Number.isNaN(urgencyNeededAt.getTime())) {
           setErrorMessage('Indiquez quand le besoin urgent doit être couvert.')
           return
@@ -265,7 +266,7 @@ export function NgoMissionCreatePage() {
         requirements,
         accessibility, tagSlugs: selectedTags,
         requestUrgent, urgencyJustification: value('urgencyJustification'),
-        urgencyNeededBy: requestUrgent ? new Date(value('urgencyNeededBy')).toISOString() : null,
+        urgencyNeededBy: requestUrgent ? parseMoroccoDateTimeInput(value('urgencyNeededBy')).toISOString() : null,
       })
       navigate(`/missions/${result.mission_slug}`, { replace: true })
     } catch (error) {
@@ -311,6 +312,7 @@ export function NgoMissionCreatePage() {
         </Section>
 
         <Section title="Date et capacité">
+          <p className="text-xs leading-5 text-slate-500">Toutes les heures sont saisies dans le fuseau de Casablanca.</p>
           <Field label="Début" name="startsAt" onInput={(event) => setStartsAtValue(event.currentTarget.value)} type="datetime-local" value={startsAtValue} />
           <Field label="Fin" name="endsAt" onInput={(event) => setEndsAtValue(event.currentTarget.value)} type="datetime-local" value={endsAtValue} />
           <div className={`flex items-center justify-between gap-3 rounded-[18px] p-4 ${calculatedDurationMinutes == null ? 'bg-slate-50 text-slate-500' : 'bg-emerald-50 text-emerald-800'}`}>

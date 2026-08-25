@@ -2,6 +2,7 @@ import { ArrowLeft, Building2, Check, Clock3, ExternalLink, LogOut, ShieldCheck,
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { MOROCCO_TIME_ZONE } from '../lib/date-time'
 import { supabase } from '../lib/supabase'
 import { getMyAccountType } from '../services/ngos'
 import {
@@ -94,7 +95,7 @@ async function openDocument(path?: string) { if (!path) return; try { const url 
 
 function UrgencyQueue({ items, onReview }: { items: UrgencyQueueItem[]; onReview: (id: string, approved: boolean, reason?: string) => Promise<void> }) {
   if (!items.length) return <Empty icon={Siren} text="Aucune demande urgente en attente." />
-  return <section className="mt-5 space-y-3">{items.map((item) => { const ngo = Array.isArray(item.ngos) ? item.ngos[0] : item.ngos; return <article className="rounded-[22px] bg-white p-4 shadow-sm" key={item.id}><div className="flex items-start justify-between gap-3"><div><h2 className="font-bold">{item.title}</h2><p className="mt-1 text-xs text-slate-500">{ngo?.name}</p></div><Siren className="text-rose-500" size={20} /></div><p className="mt-4 rounded-[16px] bg-amber-50 p-3 text-sm leading-6 text-amber-950">{item.urgency_justification}</p><p className="mt-3 flex items-center gap-1 text-xs text-slate-500"><Clock3 aria-hidden="true" size={13} />Besoin avant {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.urgency_needed_by))}</p><DecisionButtons id={item.id} onReview={onReview} /></article> })}</section>
+  return <section className="mt-5 space-y-3">{items.map((item) => { const ngo = Array.isArray(item.ngos) ? item.ngos[0] : item.ngos; return <article className="rounded-[22px] bg-white p-4 shadow-sm" key={item.id}><div className="flex items-start justify-between gap-3"><div><h2 className="font-bold">{item.title}</h2><p className="mt-1 text-xs text-slate-500">{ngo?.name}</p></div><Siren className="text-rose-500" size={20} /></div><p className="mt-4 rounded-[16px] bg-amber-50 p-3 text-sm leading-6 text-amber-950">{item.urgency_justification}</p><p className="mt-3 flex items-center gap-1 text-xs text-slate-500"><Clock3 aria-hidden="true" size={13} />Besoin avant {new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short', timeZone: MOROCCO_TIME_ZONE }).format(new Date(item.urgency_needed_by))}</p><DecisionButtons id={item.id} onReview={onReview} /></article> })}</section>
 }
 
 function DecisionButtons({ id, onReview }: { id: string; onReview: (id: string, approved: boolean, reason?: string) => Promise<void> }) {

@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { AddressAutocomplete } from '../components/AddressAutocomplete'
 import type { AddressSelection } from '../components/AddressAutocomplete'
+import { parseMoroccoDateTimeInput, toMoroccoDateTimeInput } from '../lib/date-time'
 import {
   deleteMissionImage,
   getMissionFormOptions,
@@ -23,12 +24,6 @@ const difficulties: Array<{ description: string; label: string; value: Difficult
   { value: 'high', label: 'Élevée', description: 'Très exigeante' },
 ]
 
-function toLocalDateTime(value: string) {
-  const date = new Date(value)
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-  return localDate.toISOString().slice(0, 16)
-}
-
 function approximateLocation(latitude: number, longitude: number) {
   const distanceMeters = 60 + Math.random() * 40
   const angle = Math.random() * Math.PI * 2
@@ -39,7 +34,7 @@ function approximateLocation(latitude: number, longitude: number) {
 }
 
 function durationLabel(startsAt: string, endsAt: string) {
-  const minutes = Math.round((new Date(endsAt).getTime() - new Date(startsAt).getTime()) / 60_000)
+  const minutes = Math.round((parseMoroccoDateTimeInput(endsAt).getTime() - parseMoroccoDateTimeInput(startsAt).getTime()) / 60_000)
   if (!Number.isFinite(minutes) || minutes <= 0) return 'Calculée automatiquement'
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
@@ -87,9 +82,9 @@ export function NgoMissionEditPage() {
         setSelectedTags(snapshot.tagSlugs)
         setTitle(snapshot.title)
         setDescription(snapshot.description)
-        setStartsAt(toLocalDateTime(snapshot.startsAt))
-        setEndsAt(toLocalDateTime(snapshot.endsAt))
-        setRegistrationDeadline(toLocalDateTime(snapshot.registrationDeadline))
+        setStartsAt(toMoroccoDateTimeInput(snapshot.startsAt))
+        setEndsAt(toMoroccoDateTimeInput(snapshot.endsAt))
+        setRegistrationDeadline(toMoroccoDateTimeInput(snapshot.registrationDeadline))
         setUnlimitedCapacity(snapshot.capacity === null)
         setCapacity(snapshot.capacity === null ? '' : String(snapshot.capacity))
         setDifficulty(snapshot.difficulty)
@@ -118,9 +113,10 @@ export function NgoMissionEditPage() {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!user || !mission || !address) { setErrorMessage('Sélectionnez une adresse dans les suggestions.'); return }
-    const start = new Date(startsAt)
-    const end = new Date(endsAt)
-    const deadline = new Date(registrationDeadline)
+    const start = parseMoroccoDateTimeInput(startsAt)
+    const end = parseMoroccoDateTimeInput(endsAt)
+    const deadline = parseMoroccoDateTimeInput(registrationDeadline)
+    if ([start, end, deadline].some((date) => Number.isNaN(date.getTime()))) { setErrorMessage('Vérifiez les dates et les heures saisies.'); return }
     if (end <= start) { setErrorMessage('La fin doit être postérieure au début.'); return }
     if (start <= new Date()) { setErrorMessage('Le début de la mission doit rester dans le futur.'); return }
     if (deadline >= start) { setErrorMessage('La date limite doit précéder le début de la mission.'); return }
@@ -193,6 +189,7 @@ export function NgoMissionEditPage() {
         </Section>
 
         <Section title="Date et capacité">
+          <p className="rounded-[16px] bg-sky-50 p-3 text-xs font-semibold text-sky-800">Toutes les heures sont saisies dans le fuseau de Casablanca.</p>
           <Field label="Début" onChange={setStartsAt} required type="datetime-local" value={startsAt} />
           <Field label="Fin" onChange={setEndsAt} required type="datetime-local" value={endsAt} />
           <div className="flex items-center justify-between rounded-[18px] bg-emerald-50 p-4 text-sm text-emerald-800"><span className="font-semibold">Durée calculée</span><strong>{durationLabel(startsAt, endsAt)}</strong></div>
