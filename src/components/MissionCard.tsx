@@ -48,6 +48,68 @@ export function MissionCard({
     else setLocalSaved(nextSaved)
   }
 
+  if (isUrgent) {
+    return (
+      <article className="w-full bg-white text-slate-950">
+        <div className="group relative isolate aspect-[1.62] w-full overflow-hidden rounded-[26px] bg-slate-900 shadow-sm">
+          <img
+            alt=""
+            className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.02]"
+            src={mission.coverImageUrl}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/20" />
+          <Link
+            aria-label={`Voir la mission ${mission.title}`}
+            className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white"
+            to={`/missions/${mission.id}`}
+          />
+
+          <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between p-3.5 pointer-events-none">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-rose-500 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+                Urgent
+              </span>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm">
+                {mission.points} <span className="text-sky-500">✦</span>
+              </span>
+            </div>
+            <button
+              aria-label={isSaved ? 'Retirer des favoris' : 'Enregistrer la mission'}
+              aria-pressed={isSaved}
+              className="pointer-events-auto grid size-10 place-items-center rounded-full bg-white/95 text-slate-700 shadow-sm transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              onClick={toggleSaved}
+              type="button"
+            >
+              <Heart aria-hidden="true" fill={isSaved ? 'currentColor' : 'none'} size={20} />
+            </button>
+          </div>
+        </div>
+
+        <div className="px-0.5 pt-3">
+          <Link className="relative z-10 block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to={`/missions/${mission.id}`}>
+            <h3 className="text-[21px] font-bold leading-tight tracking-[-0.025em]">{mission.title}</h3>
+          </Link>
+          <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-sky-600">
+            <CalendarDays aria-hidden="true" size={13} />
+            {formatMissionDate(mission.startsAt)}
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-slate-500">
+            <MapPin aria-hidden="true" className="shrink-0" size={13} />
+            {mission.generalArea}, {mission.city} · {mission.ngoName}
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <AvatarStack count={mission.registrationCount} />
+            <span className="text-xs font-semibold text-slate-700">
+              {mission.registrationCount > 0
+                ? `${mission.registrationCount} ${mission.registrationCount === 1 ? 'bénévole inscrit' : 'bénévoles inscrits'}`
+                : 'Soyez le premier à participer'}
+            </span>
+          </div>
+        </div>
+      </article>
+    )
+  }
+
   return (
     <article
       className={`group relative isolate shrink-0 overflow-hidden bg-slate-900 text-white shadow-sm ${

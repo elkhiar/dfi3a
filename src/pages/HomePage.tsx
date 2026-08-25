@@ -151,11 +151,15 @@ export function HomePage() {
           </div>
         ) : urgentMissions.length === 0 ? (
           <div className="rounded-[22px] bg-slate-50 p-5 text-center text-sm text-slate-500">Aucune mission urgente pour le moment.</div>
-        ) : <div className="scrollbar-none -mr-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pr-4">
-          {urgentMissions.map((mission) => (
-            <div className="snap-start snap-always" key={mission.id}>
-              <MissionCard mission={mission} variant="urgent" />
-            </div>
+        ) : <div className="space-y-7">
+          {urgentMissions.slice(0, 2).map((mission) => (
+            <MissionCard
+              isSaved={Boolean(user) && mission.databaseId ? savedMissionIds.has(mission.databaseId) : false}
+              key={mission.id}
+              mission={mission}
+              onSavedChange={(saved) => void updateSaved(mission, saved)}
+              variant="urgent"
+            />
           ))}
         </div>}
       </section>
