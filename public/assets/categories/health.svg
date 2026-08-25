@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration santé</title>
+  <rect width="800" height="520" fill="#E8F4FF"/>
+  <circle cx="400" cy="260" r="178" fill="#FFFFFF"/>
+  <path d="M400 390c-31-29-148-111-148-201 0-58 43-101 99-101 33 0 62 16 80 41 18-25 47-41 80-41 56 0 99 43 99 101 0 90-117 172-210 201Z" fill="#FF5964"/>
+  <path d="M355 190h90v55h55v90h-55v55h-90v-55h-55v-90h55Z" fill="#FFFFFF"/>
+</svg>

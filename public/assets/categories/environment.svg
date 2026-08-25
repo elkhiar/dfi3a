@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration environnement</title>
+  <rect width="800" height="520" fill="#DFF5EC"/>
+  <circle cx="650" cy="105" r="56" fill="#FFD166"/>
+  <path d="M0 385 185 235l140 113 145-175 330 262v85H0Z" fill="#7ACFA6"/>
+  <path d="M0 438 195 320l130 72 150-106 325 178v56H0Z" fill="#35A875"/>
+  <rect x="372" y="250" width="30" height="166" rx="15" fill="#7C5538"/>
+  <circle cx="386" cy="230" r="80" fill="#23865C"/>
+  <circle cx="334" cy="270" r="54" fill="#2F9E6D"/>
+  <circle cx="438" cy="270" r="54" fill="#2F9E6D"/>
+</svg>

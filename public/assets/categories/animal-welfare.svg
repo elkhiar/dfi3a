@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration protection animale</title>
+  <rect width="800" height="520" fill="#E8F7F3"/>
+  <circle cx="400" cy="320" r="118" fill="#FFFFFF"/>
+  <ellipse cx="400" cy="325" rx="95" ry="82" fill="#37A882"/>
+  <ellipse cx="270" cy="220" rx="50" ry="67" transform="rotate(-28 270 220)" fill="#37A882"/>
+  <ellipse cx="530" cy="220" rx="50" ry="67" transform="rotate(28 530 220)" fill="#37A882"/>
+  <ellipse cx="335" cy="155" rx="45" ry="61" transform="rotate(-12 335 155)" fill="#37A882"/>
+  <ellipse cx="465" cy="155" rx="45" ry="61" transform="rotate(12 465 155)" fill="#37A882"/>
+  <path d="M400 284c-24-34-79-20-79 24 0 39 51 69 79 90 28-21 79-51 79-90 0-44-55-58-79-24Z" fill="#FFFFFF"/>
+</svg>

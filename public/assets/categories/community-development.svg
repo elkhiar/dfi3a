@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration développement communautaire</title>
+  <rect width="800" height="520" fill="#EAF6FF"/>
+  <circle cx="400" cy="135" r="60" fill="#FFD166"/>
+  <path d="M95 450V265l135-100 135 100v185Z" fill="#64B7E5"/>
+  <path d="M435 450V235l135-100 135 100v215Z" fill="#3B8FC3"/>
+  <rect x="183" y="330" width="94" height="120" rx="8" fill="#FFFFFF"/>
+  <rect x="523" y="310" width="94" height="140" rx="8" fill="#FFFFFF"/>
+  <path d="M0 450h800v70H0Z" fill="#50B589"/>
+  <path d="M300 450c0-64 45-116 100-116s100 52 100 116Z" fill="#FFD7B5"/>
+  <circle cx="400" cy="310" r="42" fill="#E89C6C"/>
+</svg>

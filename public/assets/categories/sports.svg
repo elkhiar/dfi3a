@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration sport</title>
+  <rect width="800" height="520" fill="#E6F2FF"/>
+  <path d="M90 390h210M65 330h180M110 270h150" stroke="#68B8E8" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="500" cy="275" r="155" fill="#FFFFFF" stroke="#244C66" stroke-width="14"/>
+  <path d="m500 185 66 48-25 77h-82l-25-77Z" fill="#244C66"/>
+  <path d="m500 120 0 65M362 210l72 23M638 210l-72 23M395 390l64-80M605 390l-64-80" stroke="#244C66" stroke-width="14"/>
+  <path d="M396 140 362 210l-15 81M604 140l34 70 15 81M347 291l48 99 79 37M653 291l-48 99-79 37" fill="none" stroke="#244C66" stroke-width="14"/>
+</svg>

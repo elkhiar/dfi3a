@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration aide sociale</title>
+  <rect width="800" height="520" fill="#FFF0E6"/>
+  <circle cx="400" cy="150" r="68" fill="#FFB36B"/>
+  <circle cx="235" cy="215" r="55" fill="#65B8E8"/>
+  <circle cx="565" cy="215" r="55" fill="#65B8E8"/>
+  <path d="M270 455c0-96 57-174 130-174s130 78 130 174Z" fill="#FF8B5C"/>
+  <path d="M95 455c0-82 51-148 140-148 48 0 87 20 111 51-24 26-39 59-45 97Z" fill="#3B8FC3"/>
+  <path d="M499 455c-6-38-21-71-45-97 24-31 63-51 111-51 89 0 140 66 140 148Z" fill="#3B8FC3"/>
+  <path d="M400 340c-24-34-78-20-78 24 0 39 50 69 78 89 28-20 78-50 78-89 0-44-54-58-78-24Z" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration éducation</title>
+  <rect width="800" height="520" fill="#FFF6D9"/>
+  <path d="M95 145c120-35 221-18 305 45v240c-84-63-185-80-305-45Z" fill="#FFFFFF" stroke="#E9B949" stroke-width="12"/>
+  <path d="M705 145c-120-35-221-18-305 45v240c84-63 185-80 305-45Z" fill="#FFFFFF" stroke="#E9B949" stroke-width="12"/>
+  <path d="M400 190v240" stroke="#E9B949" stroke-width="12"/>
+  <path d="m400 75 24 48 53 8-38 37 9 53-48-25-48 25 9-53-38-37 53-8Z" fill="#5AB1E6"/>
+  <path d="M145 235h180M145 285h180M475 235h180M475 285h180" stroke="#B9CBD6" stroke-width="14" stroke-linecap="round"/>
+</svg>

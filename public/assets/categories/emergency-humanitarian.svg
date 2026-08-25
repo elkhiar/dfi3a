@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title">
+  <title id="title">Illustration urgence et aide humanitaire</title>
+  <rect width="800" height="520" fill="#FFF0F0"/>
+  <path d="M150 205 400 85l250 120-250 120Z" fill="#FF777D"/>
+  <path d="M150 205v200l250 100V325Z" fill="#E95660"/>
+  <path d="M650 205v200L400 505V325Z" fill="#FF6B70"/>
+  <path d="M350 135h100v55h55v90h-55v55H350v-55h-55v-90h55Z" fill="#FFFFFF"/>
+  <path d="M185 420c65-58 129-62 215-8 86-54 150-50 215 8-69 53-144 76-215 85-71-9-146-32-215-85Z" fill="#FFD166"/>
+</svg>
