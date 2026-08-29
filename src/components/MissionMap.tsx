@@ -18,6 +18,23 @@ type MissionMapProps = {
 
 const geoapifyApiKey = import.meta.env.VITE_GEOAPIFY_API_KEY
 
+const geoapifyRasterStyle: maplibregl.StyleSpecification | undefined = geoapifyApiKey
+  ? {
+      version: 8,
+      sources: {
+        geoapify: {
+          type: 'raster',
+          tiles: [
+            `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${encodeURIComponent(geoapifyApiKey)}`,
+          ],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors · © Geoapify',
+        },
+      },
+      layers: [{ id: 'geoapify', type: 'raster', source: 'geoapify' }],
+    }
+  : undefined
+
 export function MissionMap({ missions, onOpen, onSelect, origin, selectedMission }: MissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
@@ -26,11 +43,11 @@ export function MissionMap({ missions, onOpen, onSelect, origin, selectedMission
   const initialOriginRef = useRef(origin)
 
   useEffect(() => {
-    if (!containerRef.current || !geoapifyApiKey) return
+    if (!containerRef.current || !geoapifyRasterStyle) return
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: `https://maps.geoapify.com/v1/styles/osm-bright/style.json?apiKey=${encodeURIComponent(geoapifyApiKey)}`,
+      style: geoapifyRasterStyle,
       center: [initialOriginRef.current.longitude, initialOriginRef.current.latitude],
       zoom: 11,
       attributionControl: { compact: true },
@@ -101,8 +118,10 @@ export function MissionMap({ missions, onOpen, onSelect, origin, selectedMission
       }
     }
 
-    if (map.loaded()) updateMap()
-    else map.once('load', updateMap)
+    // DOM markers do not depend on the basemap tiles being loaded. Rendering
+    // them immediately also keeps mission locations visible on slow networks.
+    updateMap()
+    map.once('load', updateMap)
 
     return () => {
       map.off('load', updateMap)
