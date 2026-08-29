@@ -155,28 +155,45 @@ export function ExplorePage() {
     }
 
     setIsLocating(true)
+
+    const applyPosition = (position: GeolocationPosition) => {
+      const accuracy = Math.round(position.coords.accuracy)
+      setSearchOrigin({ latitude: position.coords.latitude, longitude: position.coords.longitude })
+      setLocationAccuracy(position.coords.accuracy)
+      setHasUserLocation(true)
+      setLocationLabel(`votre position · précision ±${accuracy} m`)
+      setLocationMessage(accuracy > 500
+        ? 'Position réseau approximative utilisée. Sur téléphone, activez le GPS et la localisation précise pour améliorer le résultat.'
+        : '')
+      setIsLocating(false)
+    }
+
+    const failLocation = (error: GeolocationPositionError) => {
+      setSearchOrigin(defaultLocation)
+      setLocationAccuracy(null)
+      setHasUserLocation(false)
+      setLocationLabel('centre de Mers Sultan · pas votre position')
+      setLocationMessage(error.code === error.PERMISSION_DENIED
+        ? 'Localisation refusée. Autorisez la localisation dans le navigateur, puis réessayez.'
+        : 'Votre appareil n’a fourni aucune position. La recherche reste centrée sur Mers Sultan.')
+      setIsLocating(false)
+    }
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setSearchOrigin({ latitude: position.coords.latitude, longitude: position.coords.longitude })
-        setLocationAccuracy(position.coords.accuracy)
-        setHasUserLocation(true)
-        setLocationLabel(`votre position GPS · précision ±${Math.round(position.coords.accuracy)} m`)
-        if (position.coords.accuracy > 500) {
-          setLocationMessage('Votre appareil ne fournit qu’une position approximative. Pour plus de précision, activez le GPS et la localisation précise dans les réglages du navigateur.')
+      applyPosition,
+      (preciseError) => {
+        if (preciseError.code === preciseError.PERMISSION_DENIED) {
+          failLocation(preciseError)
+          return
         }
-        setIsLocating(false)
+
+        navigator.geolocation.getCurrentPosition(
+          applyPosition,
+          failLocation,
+          { enableHighAccuracy: false, maximumAge: 300_000, timeout: 8_000 },
+        )
       },
-      (error) => {
-        setSearchOrigin(defaultLocation)
-        setLocationAccuracy(null)
-        setHasUserLocation(false)
-        setLocationLabel('centre de Mers Sultan · pas votre position')
-        setLocationMessage(error.code === error.PERMISSION_DENIED
-          ? 'Localisation refusée. Autorisez la localisation précise dans le navigateur, puis réessayez.'
-          : 'Position précise introuvable. Activez le GPS, puis réessayez.')
-        setIsLocating(false)
-      },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 15_000 },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 8_000 },
     )
   }
 
