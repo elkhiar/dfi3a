@@ -13,6 +13,8 @@ type MissionMapProps = {
   onOpen: (mission: Mission) => void
   onSelect: (mission: Mission) => void
   origin: MapLocation
+  originAccuracyMeters: number | null
+  showOrigin: boolean
   selectedMission: Mission | null
 }
 
@@ -35,7 +37,15 @@ const geoapifyRasterStyle: maplibregl.StyleSpecification | undefined = geoapifyA
     }
   : undefined
 
-export function MissionMap({ missions, onOpen, onSelect, origin, selectedMission }: MissionMapProps) {
+export function MissionMap({
+  missions,
+  onOpen,
+  onSelect,
+  origin,
+  originAccuracyMeters,
+  showOrigin,
+  selectedMission,
+}: MissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const missionMarkersRef = useRef<maplibregl.Marker[]>([])
@@ -75,17 +85,22 @@ export function MissionMap({ missions, onOpen, onSelect, origin, selectedMission
       missionMarkersRef.current = []
       originMarkerRef.current?.remove()
 
-      const originElement = document.createElement('div')
-      originElement.setAttribute('aria-label', 'Votre zone de recherche')
-      originElement.style.width = '18px'
-      originElement.style.height = '18px'
-      originElement.style.borderRadius = '999px'
-      originElement.style.background = '#38bdf8'
-      originElement.style.border = '4px solid white'
-      originElement.style.boxShadow = '0 2px 8px rgb(15 23 42 / 35%)'
-      originMarkerRef.current = new maplibregl.Marker({ element: originElement })
-        .setLngLat([origin.longitude, origin.latitude])
-        .addTo(map)
+      if (showOrigin) {
+        const originElement = document.createElement('div')
+        const accuracyLabel = originAccuracyMeters == null
+          ? ''
+          : `, précision approximative ${Math.round(originAccuracyMeters)} mètres`
+        originElement.setAttribute('aria-label', `Votre position actuelle${accuracyLabel}`)
+        originElement.style.width = '18px'
+        originElement.style.height = '18px'
+        originElement.style.borderRadius = '999px'
+        originElement.style.background = '#38bdf8'
+        originElement.style.border = '4px solid white'
+        originElement.style.boxShadow = '0 2px 8px rgb(15 23 42 / 35%)'
+        originMarkerRef.current = new maplibregl.Marker({ element: originElement })
+          .setLngLat([origin.longitude, origin.latitude])
+          .addTo(map)
+      }
 
       const bounds = new maplibregl.LngLatBounds()
       bounds.extend([origin.longitude, origin.latitude])
@@ -126,7 +141,7 @@ export function MissionMap({ missions, onOpen, onSelect, origin, selectedMission
     return () => {
       map.off('load', updateMap)
     }
-  }, [missions, onSelect, origin, selectedMission])
+  }, [missions, onSelect, origin, originAccuracyMeters, selectedMission, showOrigin])
 
   if (!geoapifyApiKey) {
     return <div className="mt-4 rounded-[24px] bg-rose-50 p-6 text-center text-sm font-semibold text-rose-700">La carte est temporairement indisponible.</div>

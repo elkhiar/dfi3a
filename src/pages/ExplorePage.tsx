@@ -69,7 +69,9 @@ export function ExplorePage() {
   })
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
   const [searchOrigin, setSearchOrigin] = useState<MapLocation>(defaultLocation)
-  const [locationLabel, setLocationLabel] = useState('Mers Sultan · position par défaut')
+  const [locationLabel, setLocationLabel] = useState('centre de Mers Sultan · pas votre position')
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null)
+  const [hasUserLocation, setHasUserLocation] = useState(false)
   const [locationMessage, setLocationMessage] = useState('')
   const [isLocating, setIsLocating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -156,16 +158,25 @@ export function ExplorePage() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setSearchOrigin({ latitude: position.coords.latitude, longitude: position.coords.longitude })
-        setLocationLabel('Votre position actuelle')
+        setLocationAccuracy(position.coords.accuracy)
+        setHasUserLocation(true)
+        setLocationLabel(`votre position GPS · précision ±${Math.round(position.coords.accuracy)} m`)
+        if (position.coords.accuracy > 500) {
+          setLocationMessage('Votre appareil ne fournit qu’une position approximative. Pour plus de précision, activez le GPS et la localisation précise dans les réglages du navigateur.')
+        }
         setIsLocating(false)
       },
-      () => {
+      (error) => {
         setSearchOrigin(defaultLocation)
-        setLocationLabel('Mers Sultan · position par défaut')
-        setLocationMessage('Position non autorisée. La recherche reste centrée sur Mers Sultan.')
+        setLocationAccuracy(null)
+        setHasUserLocation(false)
+        setLocationLabel('centre de Mers Sultan · pas votre position')
+        setLocationMessage(error.code === error.PERMISSION_DENIED
+          ? 'Localisation refusée. Autorisez la localisation précise dans le navigateur, puis réessayez.'
+          : 'Position précise introuvable. Activez le GPS, puis réessayez.')
         setIsLocating(false)
       },
-      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15_000 },
     )
   }
 
@@ -272,7 +283,9 @@ export function ExplorePage() {
             onOpen={(mission) => navigate(`/missions/${mission.id}`)}
             onSelect={setSelectedMission}
             origin={searchOrigin}
+            originAccuracyMeters={locationAccuracy}
             selectedMission={visibleSelectedMission}
+            showOrigin={hasUserLocation}
           />
         </Suspense>
       )}
