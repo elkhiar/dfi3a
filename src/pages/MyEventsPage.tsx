@@ -1,11 +1,12 @@
-import { CalendarDays, CheckCircle2, Heart, MapPin, Sparkles } from 'lucide-react'
+import { Ban, CalendarDays, CheckCircle2, Clock3, Heart, MapPin, Sparkles, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
-import { getMyJoinedMissions, getMySavedMissions } from '../services/missions'
+import { getMyJoinedMissions, getMyMissionHistory, getMySavedMissions } from '../services/missions'
 import type { Mission } from '../types/mission'
+import type { VolunteerMissionHistoryEntry } from '../services/missions'
 
-type EventsTab = 'joined' | 'saved'
+type EventsTab = 'joined' | 'saved' | 'history'
 
 function formatEventDate(value: string) {
   return new Intl.DateTimeFormat('fr-FR', {
@@ -30,6 +31,7 @@ export function MyEventsPage() {
   const [activeTab, setActiveTab] = useState<EventsTab>('joined')
   const [missions, setMissions] = useState<Mission[]>([])
   const [savedMissions, setSavedMissions] = useState<Mission[]>([])
+  const [history, setHistory] = useState<VolunteerMissionHistoryEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -43,11 +45,13 @@ export function MyEventsPage() {
     void Promise.all([
       getMyJoinedMissions(),
       getMySavedMissions().catch(() => [] as Mission[]),
+      getMyMissionHistory(),
     ])
-      .then(([joinedMissions, volunteerSavedMissions]) => {
+      .then(([joinedMissions, volunteerSavedMissions, historyEntries]) => {
         if (!isCurrent) return
         setMissions(joinedMissions)
         setSavedMissions(volunteerSavedMissions)
+        setHistory(historyEntries)
       })
       .catch(() => {
         if (isCurrent) setErrorMessage('Impossible de charger vos événements.')
@@ -67,12 +71,15 @@ export function MyEventsPage() {
       <h1 className="mt-1 text-[28px] font-bold tracking-[-0.03em]">Mes événements</h1>
       <p className="mt-1 text-sm text-slate-500">Retrouvez vos prochaines missions et vos favoris.</p>
 
-      <div className="mt-6 grid grid-cols-2 rounded-full bg-slate-100 p-1">
+      <div className="mt-6 grid grid-cols-3 rounded-full bg-slate-100 p-1">
         <TabButton active={activeTab === 'joined'} onClick={() => setActiveTab('joined')}>
           À venir
         </TabButton>
         <TabButton active={activeTab === 'saved'} onClick={() => setActiveTab('saved')}>
           Enregistrées
+        </TabButton>
+        <TabButton active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
+          Historique
         </TabButton>
       </div>
 
@@ -89,10 +96,24 @@ export function MyEventsPage() {
             Se connecter
           </Link>
         </EmptyState>
-      ) : activeTab === 'saved' && (isLoading || isAuthLoading) ? (
+      ) : isLoading || isAuthLoading ? (
         <div className="grid min-h-72 place-items-center">
           <span className="block size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" />
         </div>
+      ) : errorMessage ? (
+        <p className="mt-6 rounded-[18px] bg-rose-50 p-4 text-sm text-rose-700" role="alert">
+          {errorMessage}
+        </p>
+      ) : activeTab === 'history' && history.length === 0 ? (
+        <EmptyState
+          description="Vos missions terminées et vos annulations apparaîtront ici."
+          icon={Clock3}
+          title="Aucun historique"
+        />
+      ) : activeTab === 'history' ? (
+        <section className="mt-6 space-y-3" aria-label="Historique privé des missions">
+          {history.map((entry) => <HistoryCard entry={entry} key={entry.registrationId} />)}
+        </section>
       ) : activeTab === 'saved' && savedMissions.length === 0 ? (
         <EmptyState
           description="Les missions que vous enregistrerez apparaîtront ici."
@@ -105,14 +126,6 @@ export function MyEventsPage() {
             <JoinedMissionCard key={mission.id} mission={mission} status="saved" />
           ))}
         </section>
-      ) : isLoading || isAuthLoading ? (
-        <div className="grid min-h-72 place-items-center">
-          <span className="block size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" />
-        </div>
-      ) : errorMessage ? (
-        <p className="mt-6 rounded-[18px] bg-rose-50 p-4 text-sm text-rose-700" role="alert">
-          {errorMessage}
-        </p>
       ) : missions.length === 0 ? (
         <EmptyState
           description="Explorez les missions et rejoignez celle qui vous ressemble."
@@ -127,6 +140,44 @@ export function MyEventsPage() {
         </section>
       )}
     </div>
+  )
+}
+
+function HistoryCard({ entry }: { entry: VolunteerMissionHistoryEntry }) {
+  const isMissionCancelled = entry.missionStatus === 'cancelled'
+  const status = isMissionCancelled
+    ? { icon: Ban, label: 'Mission annulée', style: 'bg-amber-50 text-amber-800' }
+    : entry.registrationStatus === 'cancelled'
+      ? { icon: Ban, label: 'Inscription annulée', style: 'bg-slate-100 text-slate-700' }
+      : entry.attendanceStatus === 'present'
+        ? { icon: CheckCircle2, label: 'Présence validée', style: 'bg-emerald-50 text-emerald-800' }
+        : entry.attendanceStatus === 'absent'
+          ? { icon: XCircle, label: 'Absence', style: 'bg-rose-50 text-rose-700' }
+          : { icon: Clock3, label: 'Validation en attente', style: 'bg-sky-50 text-sky-700' }
+  const StatusIcon = status.icon
+  const pointLabel = entry.pointsApplied > 0
+    ? `+${entry.pointsApplied} pts`
+    : entry.pointsApplied < 0
+      ? `−${Math.abs(entry.pointsApplied)} pts`
+      : '0 pt'
+
+  return (
+    <article className="rounded-[22px] border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="flex gap-3">
+        <img alt="" className="size-20 shrink-0 rounded-[16px] object-cover" src={entry.coverImageUrl} />
+        <div className="min-w-0 flex-1">
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${status.style}`}><StatusIcon aria-hidden="true" size={12} />{status.label}</span>
+          <h2 className="mt-2 line-clamp-2 text-sm font-bold leading-tight">{entry.missionTitle}</h2>
+          <p className="mt-1 truncate text-xs text-slate-500">{entry.ngoName}</p>
+        </div>
+        <span className={`shrink-0 text-xs font-bold ${entry.pointsApplied < 0 ? 'text-rose-600' : entry.pointsApplied > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>{pointLabel}</span>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+        <span>{formatEventDate(entry.startsAt)} · {formatEventTime(entry.startsAt)}</span>
+        <span className="flex min-w-0 items-center gap-1 truncate"><MapPin aria-hidden="true" size={12} />{entry.generalArea}</span>
+      </div>
+      {entry.cancellationReason && <p className="mt-3 rounded-[14px] bg-slate-50 p-3 text-xs leading-5 text-slate-600"><strong>Motif :</strong> {entry.cancellationReason}</p>}
+    </article>
   )
 }
 

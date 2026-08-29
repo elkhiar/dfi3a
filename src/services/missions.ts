@@ -13,6 +13,24 @@ export type MissionViewerContext = {
   ownsMission: boolean
 }
 
+export type VolunteerMissionHistoryEntry = {
+  registrationId: string
+  missionSlug: string
+  missionTitle: string
+  categoryName: string
+  city: string
+  generalArea: string
+  startsAt: string
+  endsAt: string
+  coverImageUrl: string
+  ngoName: string
+  missionStatus: 'draft' | 'published' | 'completed' | 'cancelled'
+  registrationStatus: 'joined' | 'cancelled'
+  attendanceStatus: 'not_verified' | 'present' | 'absent'
+  pointsApplied: number
+  cancellationReason: string
+}
+
 function mapMission(row: Record<string, any>): Mission {
   return {
     id: row.slug,
@@ -179,4 +197,27 @@ export async function getMyJoinedMissions(): Promise<Mission[]> {
       (first, second) =>
         new Date(first.startsAt).getTime() - new Date(second.startsAt).getTime(),
     )
+}
+
+export async function getMyMissionHistory(): Promise<VolunteerMissionHistoryEntry[]> {
+  const { data, error } = await supabase.rpc('get_my_mission_history')
+  if (error) throw error
+
+  return (data ?? []).map((row: Record<string, any>) => ({
+    registrationId: row.registration_id,
+    missionSlug: row.mission_slug,
+    missionTitle: row.mission_title,
+    categoryName: row.category_name,
+    city: row.city,
+    generalArea: row.general_area,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    coverImageUrl: row.cover_image_path || getCategoryIllustrationPath(row.category_name || 'other'),
+    ngoName: row.ngo_name,
+    missionStatus: row.mission_status,
+    registrationStatus: row.registration_status,
+    attendanceStatus: row.attendance_status,
+    pointsApplied: Number(row.points_applied),
+    cancellationReason: row.cancellation_reason ?? '',
+  }))
 }
