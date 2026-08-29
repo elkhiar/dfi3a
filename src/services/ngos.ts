@@ -306,6 +306,18 @@ export async function getMyNgoMissions() {
   return data ?? []
 }
 
+export async function cancelNgoMission(missionId: string, reason: string) {
+  const { data, error } = await supabase.rpc('cancel_ngo_mission', {
+    p_mission_id: missionId,
+    p_reason: reason,
+  })
+  if (error) throw error
+  return data?.[0] as {
+    mission_id: string
+    cancelled_registration_count: number
+  } | undefined
+}
+
 export async function getMissionFormOptions() {
   const [{ data: categories, error: categoryError }, { data: tags, error: tagError }] =
     await Promise.all([
