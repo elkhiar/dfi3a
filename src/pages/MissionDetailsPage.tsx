@@ -1,6 +1,7 @@
 import {
   Accessibility,
   ArrowLeft,
+  Ban,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -15,6 +16,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AvatarStack } from '../components/AvatarStack'
 import { CancelRegistrationSheet } from '../components/CancelRegistrationSheet'
+import { CancelMissionSheet } from '../components/CancelMissionSheet'
 import { JoinMissionSheet } from '../components/JoinMissionSheet'
 import { useAuth } from '../auth/auth-context'
 import {
@@ -61,6 +63,7 @@ export function MissionDetailsPage() {
   const [isJoined, setIsJoined] = useState(false)
   const [isJoinSheetOpen, setIsJoinSheetOpen] = useState(false)
   const [isCancelSheetOpen, setIsCancelSheetOpen] = useState(false)
+  const [isMissionCancelSheetOpen, setIsMissionCancelSheetOpen] = useState(false)
   const [viewerState, setViewerState] = useState<MissionViewerContext & { key: string }>({ accountType: null, ownsMission: false, key: '' })
   const [mission, setMission] = useState<Mission | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -406,10 +409,11 @@ export function MissionDetailsPage() {
         ) : viewerError ? (
           <button className="min-h-12 flex-1 rounded-full bg-rose-50 px-5 text-sm font-bold text-rose-700" onClick={() => { setViewerErrorKey(''); setViewerAttempt((attempt) => attempt + 1) }} type="button">Réessayer la vérification du compte</button>
         ) : viewerContext.accountType === 'ngo' ? (
-          viewerContext.ownsMission && mission.databaseId ? <>
-            <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700" to={`/ngo/missions/${mission.databaseId}/edit`}>Modifier la mission</Link>
-            <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-sky-500 px-4 text-center text-sm font-bold text-white" to={`/ngo/missions/${mission.databaseId}/attendance`}>Gérer les présences</Link>
-          </> : <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-sky-500 px-5 text-sm font-bold text-white" to="/ngo/dashboard">Retour à l’espace ONG</Link>
+          viewerContext.ownsMission && mission.databaseId ? <div className="grid flex-1 grid-cols-2 gap-2">
+            <Link className="grid min-h-12 place-items-center rounded-full bg-slate-100 px-3 text-center text-xs font-bold text-slate-700" to={`/ngo/missions/${mission.databaseId}/edit`}>Modifier la mission</Link>
+            <Link className="grid min-h-12 place-items-center rounded-full bg-sky-500 px-3 text-center text-xs font-bold text-white" to={`/ngo/missions/${mission.databaseId}/attendance`}>Gérer les présences</Link>
+            {!hasStarted && <button className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-full border border-rose-200 text-xs font-bold text-rose-600" onClick={() => setIsMissionCancelSheetOpen(true)} type="button"><Ban aria-hidden="true" size={16} />Annuler la mission</button>}
+          </div> : <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-sky-500 px-5 text-sm font-bold text-white" to="/ngo/dashboard">Retour à l’espace ONG</Link>
         ) : viewerContext.accountType === 'admin' ? (
           <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-slate-900 px-5 text-sm font-bold text-white" to="/admin">Retour aux validations</Link>
         ) : <>
@@ -470,6 +474,14 @@ export function MissionDetailsPage() {
             setMission((current) => current ? { ...current, registrationCount: Math.max(0, current.registrationCount - 1) } : current)
           }}
           onClose={() => setIsCancelSheetOpen(false)}
+        />
+      )}
+      {viewerContext.accountType === 'ngo' && viewerContext.ownsMission && mission.databaseId && isMissionCancelSheetOpen && (
+        <CancelMissionSheet
+          missionId={mission.databaseId}
+          missionTitle={mission.title}
+          onCancelled={() => navigate('/ngo/missions', { replace: true })}
+          onClose={() => setIsMissionCancelSheetOpen(false)}
         />
       )}
     </div>
