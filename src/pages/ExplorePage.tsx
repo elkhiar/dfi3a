@@ -1,8 +1,9 @@
-import { List, Map, MapPin, Search, SlidersHorizontal } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { Crosshair, List, Map as MapIcon, MapPin, Search, SlidersHorizontal } from 'lucide-react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { MissionCard } from '../components/MissionCard'
+import type { MapLocation } from '../components/MissionMap'
 import {
   getMySavedMissionIds,
   getPublicMissions,
@@ -13,15 +14,17 @@ import type { Mission } from '../types/mission'
 type ExploreTab = 'list' | 'map'
 type Radius = 5 | 10 | 25 | 'all'
 
-const referenceLocation = { latitude: 33.5799, longitude: -7.6133 }
+const MissionMap = lazy(() => import('../components/MissionMap').then((module) => ({ default: module.MissionMap })))
 
-function distanceInKm(mission: Mission) {
+const defaultLocation = { latitude: 33.5799, longitude: -7.6133 }
+
+function distanceInKm(mission: Mission, origin: MapLocation) {
   if (mission.approximateLatitude == null || mission.approximateLongitude == null) return Number.POSITIVE_INFINITY
 
   const toRadians = (degrees: number) => (degrees * Math.PI) / 180
-  const latitudeDelta = toRadians(mission.approximateLatitude - referenceLocation.latitude)
-  const longitudeDelta = toRadians(mission.approximateLongitude - referenceLocation.longitude)
-  const firstLatitude = toRadians(referenceLocation.latitude)
+  const latitudeDelta = toRadians(mission.approximateLatitude - origin.latitude)
+  const longitudeDelta = toRadians(mission.approximateLongitude - origin.longitude)
+  const firstLatitude = toRadians(origin.latitude)
   const secondLatitude = toRadians(mission.approximateLatitude)
   const calculation =
     Math.sin(latitudeDelta / 2) ** 2 +
@@ -65,6 +68,10 @@ export function ExplorePage() {
     return urgentOnly ? 'all' : 10
   })
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
+  const [searchOrigin, setSearchOrigin] = useState<MapLocation>(defaultLocation)
+  const [locationLabel, setLocationLabel] = useState('Mers Sultan · position par défaut')
+  const [locationMessage, setLocationMessage] = useState('')
+  const [isLocating, setIsLocating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [loadAttempt, setLoadAttempt] = useState(0)
@@ -104,10 +111,10 @@ export function ExplorePage() {
       if (urgentOnly && !mission.isUrgent) return false
       if (category !== 'Toutes' && mission.category !== category) return false
       if (normalizedQuery && !searchableText(mission).includes(normalizedQuery)) return false
-      if (radius !== 'all' && distanceInKm(mission) > radius) return false
+      if (radius !== 'all' && distanceInKm(mission, searchOrigin) > radius) return false
       return true
     })
-  }, [category, missions, query, radius, urgentOnly])
+  }, [category, missions, query, radius, searchOrigin, urgentOnly])
   const visibleSelectedMission = selectedMission && filteredMissions.some((mission) => mission.id === selectedMission.id)
     ? selectedMission
     : null
@@ -136,6 +143,30 @@ export function ExplorePage() {
         return next
       })
     }
+  }
+
+  const useMyLocation = () => {
+    setLocationMessage('')
+    if (!navigator.geolocation) {
+      setLocationMessage('La localisation n’est pas disponible sur cet appareil. La recherche reste centrée sur Mers Sultan.')
+      return
+    }
+
+    setIsLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setSearchOrigin({ latitude: position.coords.latitude, longitude: position.coords.longitude })
+        setLocationLabel('Votre position actuelle')
+        setIsLocating(false)
+      },
+      () => {
+        setSearchOrigin(defaultLocation)
+        setLocationLabel('Mers Sultan · position par défaut')
+        setLocationMessage('Position non autorisée. La recherche reste centrée sur Mers Sultan.')
+        setIsLocating(false)
+      },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+    )
   }
 
   return (
@@ -184,13 +215,20 @@ export function ExplorePage() {
             <option value="all">Sans limite</option>
           </select>
         </label>
+        <button className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-sky-300 bg-sky-50 px-3 text-sm font-semibold text-sky-700 disabled:opacity-60" disabled={isLocating} onClick={useMyLocation} type="button">
+          <Crosshair aria-hidden="true" size={15} />
+          {isLocating ? 'Localisation…' : 'Ma position'}
+        </button>
       </div>
+
+      <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-slate-500"><MapPin aria-hidden="true" size={13} />Rayon calculé depuis {locationLabel}</p>
+      {locationMessage && <p className="mt-2 rounded-[14px] bg-amber-50 p-3 text-xs leading-5 text-amber-800" role="status">{locationMessage}</p>}
 
       <div className="mt-4 grid grid-cols-2 rounded-full bg-slate-100 p-1">
         <TabButton active={activeTab === 'list'} icon={List} onClick={() => setActiveTab('list')}>
           Liste
         </TabButton>
-        <TabButton active={activeTab === 'map'} icon={Map} onClick={() => setActiveTab('map')}>
+        <TabButton active={activeTab === 'map'} icon={MapIcon} onClick={() => setActiveTab('map')}>
           Carte
         </TabButton>
       </div>
@@ -228,12 +266,15 @@ export function ExplorePage() {
           ))}
         </section>
       ) : (
-        <MissionMap
-          missions={filteredMissions}
-          onOpen={(mission) => navigate(`/missions/${mission.id}`)}
-          onSelect={setSelectedMission}
-          selectedMission={visibleSelectedMission}
-        />
+        <Suspense fallback={<div className="grid min-h-[430px] place-items-center"><span className="size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></div>}>
+          <MissionMap
+            missions={filteredMissions}
+            onOpen={(mission) => navigate(`/missions/${mission.id}`)}
+            onSelect={setSelectedMission}
+            origin={searchOrigin}
+            selectedMission={visibleSelectedMission}
+          />
+        </Suspense>
       )}
     </div>
   )
@@ -256,61 +297,5 @@ function TabButton({ active, children, icon: Icon, onClick }: {
     >
       <Icon aria-hidden="true" size={17} /> {children}
     </button>
-  )
-}
-
-function MissionMap({ missions, onOpen, onSelect, selectedMission }: {
-  missions: Mission[]
-  onOpen: (mission: Mission) => void
-  onSelect: (mission: Mission) => void
-  selectedMission: Mission | null
-}) {
-  const latitudes = missions.map((mission) => mission.approximateLatitude ?? referenceLocation.latitude)
-  const longitudes = missions.map((mission) => mission.approximateLongitude ?? referenceLocation.longitude)
-  const minLatitude = Math.min(...latitudes) - 0.01
-  const maxLatitude = Math.max(...latitudes) + 0.01
-  const minLongitude = Math.min(...longitudes) - 0.01
-  const maxLongitude = Math.max(...longitudes) + 0.01
-
-  return (
-    <section className="relative mt-4 h-[430px] overflow-hidden rounded-[24px] border border-sky-100 bg-sky-50">
-      <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(#7dd3fc_1px,transparent_1px),linear-gradient(90deg,#7dd3fc_1px,transparent_1px)] [background-size:32px_32px]" />
-      {missions.map((mission) => {
-        const latitude = mission.approximateLatitude ?? referenceLocation.latitude
-        const longitude = mission.approximateLongitude ?? referenceLocation.longitude
-        const top = 10 + ((maxLatitude - latitude) / (maxLatitude - minLatitude)) * 70
-        const left = 10 + ((longitude - minLongitude) / (maxLongitude - minLongitude)) * 80
-
-        return (
-          <button
-            aria-label={`Voir ${mission.title}`}
-            className={`absolute grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-white shadow-md ${
-              selectedMission?.id === mission.id ? 'bg-slate-700 text-sky-300' : 'bg-sky-500 text-white'
-            }`}
-            key={mission.id}
-            onClick={() => onSelect(mission)}
-            style={{ left: `${left}%`, top: `${top}%` }}
-            type="button"
-          >
-            <MapPin aria-hidden="true" size={18} />
-          </button>
-        )
-      })}
-
-      {selectedMission && (
-        <button
-          className="absolute inset-x-3 bottom-3 flex gap-3 rounded-[18px] bg-white p-3 text-left shadow-lg"
-          onClick={() => onOpen(selectedMission)}
-          type="button"
-        >
-          <img alt="" className="size-16 rounded-[14px] object-cover" src={selectedMission.coverImageUrl} />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-bold">{selectedMission.title}</span>
-            <span className="mt-1 block text-xs text-slate-500">{selectedMission.generalArea}</span>
-            <span className="mt-1 block text-xs font-bold text-sky-600">{selectedMission.points} pts</span>
-          </span>
-        </button>
-      )}
-    </section>
   )
 }
