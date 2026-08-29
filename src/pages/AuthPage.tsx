@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { emailAlreadyHasAccount } from '../lib/auth-signup'
 import { getSafeReturnTo } from '../lib/navigation'
 import { supabase } from '../lib/supabase'
 
@@ -69,6 +70,11 @@ export function AuthPage() {
       })
 
       if (error) throw error
+
+      if (emailAlreadyHasAccount(data.user)) {
+        setErrorMessage('Cette adresse e-mail est déjà associée à un compte dfi3a. Connectez-vous ou utilisez une autre adresse.')
+        return
+      }
 
       if (data.session) {
         navigate(returnTo, { replace: true })
@@ -165,6 +171,7 @@ export function AuthPage() {
         )}
 
         <Field autoComplete="email" label="Adresse e-mail" name="email" required type="email" />
+        {mode === 'signup' && <p className="-mt-2 text-xs leading-5 text-slate-500">Une adresse e-mail ne peut être utilisée que pour un seul compte dfi3a.</p>}
 
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Mot de passe</span>

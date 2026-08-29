@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { emailAlreadyHasAccount } from '../lib/auth-signup'
 import { supabase } from '../lib/supabase'
 import {
   getMyAccountType,
@@ -102,6 +103,10 @@ function NgoAccountSignup() {
       setErrorMessage(error.message)
       return
     }
+    if (emailAlreadyHasAccount(data.user)) {
+      setErrorMessage('Cette adresse e-mail est déjà associée à un compte dfi3a. Un compte ONG doit utiliser une autre adresse.')
+      return
+    }
     if (data.session) window.location.reload()
     else setConfirmationEmail(email)
   }
@@ -151,6 +156,7 @@ function NgoAccountSignup() {
       <form className="mt-7 space-y-4" onSubmit={createAccount}>
         <div className="grid grid-cols-2 gap-3"><Field label="Prénom du contact" name="firstName" /><Field label="Nom du contact" name="lastName" /></div>
         <Field label="E-mail professionnel" name="email" type="email" />
+        <p className="-mt-2 text-xs leading-5 text-slate-500">Cette adresse doit être différente de celle de tout compte bénévole ou ONG existant.</p>
         <Field label="Mot de passe" minLength={8} name="password" type="password" />
         {errorMessage && <p className="rounded-[16px] bg-rose-50 p-3 text-sm text-rose-700" role="alert">{errorMessage}</p>}
         <button className="min-h-12 w-full rounded-full bg-sky-500 text-sm font-bold text-white disabled:opacity-60" disabled={isSubmitting} type="submit">{isSubmitting ? 'Création…' : 'Créer le compte ONG'}</button>
