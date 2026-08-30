@@ -1,8 +1,9 @@
-import { Bell, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { MissionCard } from '../components/MissionCard'
+import { NotificationBell } from '../components/NotificationBell'
 import {
   getMySavedMissionIds,
   getPublicMissions,
@@ -113,15 +114,7 @@ export function HomePage() {
           <span className="mr-2 text-sm text-slate-600">
             <span className="mr-1 font-bold text-sky-500">✦</span>{totalPoints}
           </span>
-          <button
-            aria-label="Notifications"
-            className="grid size-9 cursor-not-allowed place-items-center rounded-full text-slate-300"
-            disabled
-            title="Notifications bientôt disponibles"
-            type="button"
-          >
-            <Bell aria-hidden="true" size={20} />
-          </button>
+          <NotificationBell />
           <button
             aria-label="Ouvrir le profil"
             className="ml-0.5 grid size-8 place-items-center overflow-hidden rounded-full bg-sky-500 text-xs font-bold text-white"

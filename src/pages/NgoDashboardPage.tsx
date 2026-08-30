@@ -2,6 +2,7 @@ import { Building2, CalendarDays, Plus, ShieldAlert, Siren } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { NotificationBell } from '../components/NotificationBell'
 import { MOROCCO_TIME_ZONE } from '../lib/date-time'
 import { getMyAccountType, getMyNgoApplication, getMyNgoMissions } from '../services/ngos'
 import type { NgoApplicationSnapshot } from '../services/ngos'
@@ -52,7 +53,7 @@ export function NgoDashboardPage() {
     <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
       <header className="flex items-center justify-between gap-4">
         <div><p className="text-xs font-semibold text-sky-600">Accueil ONG</p><h1 className="mt-1 text-2xl font-bold">{application.name}</h1></div>
-        <Link aria-label="Créer une mission" className="grid size-11 place-items-center rounded-full bg-sky-500 text-white" to="/ngo/missions/new"><Plus aria-hidden="true" size={22} /></Link>
+        <div className="flex items-center gap-1"><NotificationBell className="bg-white shadow-sm" /><Link aria-label="Créer une mission" className="grid size-11 place-items-center rounded-full bg-sky-500 text-white" to="/ngo/missions/new"><Plus aria-hidden="true" size={22} /></Link></div>
       </header>
 
       <section className="mt-6 grid grid-cols-2 gap-3">

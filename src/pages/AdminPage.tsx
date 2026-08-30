@@ -2,6 +2,7 @@ import { ArrowLeft, Building2, Check, Clock3, ExternalLink, LogOut, ShieldCheck,
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { NotificationBell } from '../components/NotificationBell'
 import { MOROCCO_TIME_ZONE } from '../lib/date-time'
 import { supabase } from '../lib/supabase'
 import { getMyAccountType } from '../services/ngos'
@@ -76,7 +77,7 @@ export function AdminPage() {
     <main className="mx-auto min-h-dvh w-full max-w-4xl bg-slate-50 px-5 pb-12 pt-8 text-slate-950">
       <div className="flex items-center justify-between gap-3">
         <button aria-label="Retour" className="grid size-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-700" onClick={() => navigate(-1)} type="button"><ArrowLeft aria-hidden="true" size={21} /></button>
-        <button className="flex min-h-11 items-center gap-2 rounded-full border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-600" onClick={() => void signOut()} type="button"><LogOut aria-hidden="true" size={17} />Se déconnecter</button>
+        <div className="flex items-center gap-2"><NotificationBell className="border border-slate-200 bg-white" /><button className="flex min-h-11 items-center gap-2 rounded-full border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-600" onClick={() => void signOut()} type="button"><LogOut aria-hidden="true" size={17} />Se déconnecter</button></div>
       </div>
       <p className="mt-6 text-xs font-semibold text-sky-600">Administration dfi3a</p><h1 className="mt-1 text-[28px] font-bold">Validations</h1>
       <div className="mt-6 grid grid-cols-2 rounded-full bg-slate-200 p-1"><Tab active={activeTab === 'ngos'} onClick={() => setActiveTab('ngos')}>ONG · {ngos.length}</Tab><Tab active={activeTab === 'urgencies'} onClick={() => setActiveTab('urgencies')}>Urgences · {urgencies.length}</Tab></div>
