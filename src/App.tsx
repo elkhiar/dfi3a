@@ -8,6 +8,8 @@ const ExplorePage = lazy(() => import('./pages/ExplorePage').then((module) => ({
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then((module) => ({ default: module.AuthCallbackPage })))
 const AuthPage = lazy(() => import('./pages/AuthPage').then((module) => ({ default: module.AuthPage })))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((module) => ({ default: module.ForgotPasswordPage })))
+const FollowedNgosPage = lazy(() => import('./pages/FollowedNgosPage').then((module) => ({ default: module.FollowedNgosPage })))
+const FriendsPage = lazy(() => import('./pages/FriendsPage').then((module) => ({ default: module.FriendsPage })))
 const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage').then((module) => ({ default: module.LeaderboardPage })))
 const MyEventsPage = lazy(() => import('./pages/MyEventsPage').then((module) => ({ default: module.MyEventsPage })))
@@ -20,8 +22,10 @@ const NgoMissionCreatePage = lazy(() => import('./pages/NgoMissionCreatePage').t
 const NgoMissionEditPage = lazy(() => import('./pages/NgoMissionEditPage').then((module) => ({ default: module.NgoMissionEditPage })))
 const NgoMissionsPage = lazy(() => import('./pages/NgoMissionsPage').then((module) => ({ default: module.NgoMissionsPage })))
 const NgoProfilePage = lazy(() => import('./pages/NgoProfilePage').then((module) => ({ default: module.NgoProfilePage })))
+const NgoPublicProfilePage = lazy(() => import('./pages/NgoPublicProfilePage').then((module) => ({ default: module.NgoPublicProfilePage })))
 const NgoAttendancePage = lazy(() => import('./pages/NgoAttendancePage').then((module) => ({ default: module.NgoAttendancePage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const VolunteerPublicProfilePage = lazy(() => import('./pages/VolunteerPublicProfilePage').then((module) => ({ default: module.VolunteerPublicProfilePage })))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((module) => ({ default: module.ResetPasswordPage })))
 
 export default function App() {
@@ -34,6 +38,10 @@ export default function App() {
         <Route path="events" element={<MyEventsPage />} />
         <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="following" element={<FollowedNgosPage />} />
+        <Route path="friends" element={<FriendsPage />} />
+        <Route path="ngos/:ngoId" element={<NgoPublicProfilePage />} />
+        <Route path="users/:userId" element={<VolunteerPublicProfilePage />} />
       </Route>
       <Route path="auth" element={<AuthPage />} />
       <Route path="auth/callback" element={<AuthCallbackPage />} />

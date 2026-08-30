@@ -9,6 +9,7 @@ type MissionCardProps = {
   variant?: 'urgent' | 'standard'
   isSaved?: boolean
   onSavedChange?: (saved: boolean) => void
+  showSaveButton?: boolean
 }
 
 const categoryStyles: Record<string, string> = {
@@ -37,6 +38,7 @@ export function MissionCard({
   variant = 'standard',
   isSaved: controlledSaved,
   onSavedChange,
+  showSaveButton = true,
 }: MissionCardProps) {
   const [localSaved, setLocalSaved] = useState(false)
   const isSaved = controlledSaved ?? localSaved
@@ -73,7 +75,7 @@ export function MissionCard({
                 {mission.points} <span className="text-sky-500">✦</span>
               </span>
             </div>
-            <button
+            {showSaveButton && <button
               aria-label={isSaved ? 'Retirer des favoris' : 'Enregistrer la mission'}
               aria-pressed={isSaved}
               className="pointer-events-auto grid size-10 place-items-center rounded-full bg-white/95 text-slate-700 shadow-sm transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -81,7 +83,7 @@ export function MissionCard({
               type="button"
             >
               <Heart aria-hidden="true" fill={isSaved ? 'currentColor' : 'none'} size={20} />
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -146,7 +148,7 @@ export function MissionCard({
             {mission.points} <span className="text-sky-500">✦</span>
           </span>
         ) : (
-          <button
+          showSaveButton ? <button
             aria-label={isSaved ? 'Retirer des favoris' : 'Enregistrer la mission'}
             aria-pressed={isSaved}
             className="relative z-20 grid size-9 place-items-center rounded-full bg-black/10 text-sky-300 backdrop-blur-sm transition hover:bg-black/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -158,7 +160,7 @@ export function MissionCard({
               fill={isSaved ? 'currentColor' : 'none'}
               size={20}
             />
-          </button>
+          </button> : <span />
         )}
       </div>
 

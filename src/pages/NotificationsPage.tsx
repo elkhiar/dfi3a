@@ -37,9 +37,11 @@ function formatNotificationTime(value: string) {
 function NotificationIcon({ type }: { type: string }) {
   const Icon = type.startsWith('attendance_')
     ? type === 'attendance_present' ? CalendarCheck : CalendarX2
-    : type === 'mission_cancelled' ? CalendarX2
+    : type === 'ngo_new_mission' ? Building2
+      : type === 'mission_cancelled' ? CalendarX2
       : type === 'mission_updated' ? CalendarClock
-        : type === 'registration_joined' || type === 'registration_confirmed' || type === 'registration_cancelled' ? UserPlus
+        : type.startsWith('friend_request_') ? UserPlus
+          : type === 'registration_joined' || type === 'registration_confirmed' || type === 'registration_cancelled' ? UserPlus
           : type.startsWith('urgency_') ? Siren
             : type.startsWith('ngo_application_') ? Building2
               : ShieldCheck

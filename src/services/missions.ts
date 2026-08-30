@@ -31,7 +31,7 @@ export type VolunteerMissionHistoryEntry = {
   cancellationReason: string
 }
 
-function mapMission(row: Record<string, any>): Mission {
+export function mapMissionRow(row: Record<string, any>): Mission {
   return {
     id: row.slug,
     databaseId: row.id,
@@ -70,7 +70,7 @@ export async function getMissionBySlug(slug: string): Promise<Mission | null> {
   const row = data?.[0]
   if (!row) return null
 
-  return mapMission(row)
+  return mapMissionRow(row)
 }
 
 export async function getMissionViewerContext(missionId: string): Promise<MissionViewerContext> {
@@ -103,7 +103,7 @@ export async function getPublicMissions(): Promise<Mission[]> {
   if (error) throw error
   const now = Date.now()
   return (data ?? [])
-    .map((row: Record<string, any>) => mapMission(row))
+    .map((row: Record<string, any>) => mapMissionRow(row))
     .filter((mission: Mission) => new Date(mission.endsAt).getTime() > now)
 }
 

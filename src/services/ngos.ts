@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase'
+import { mapMissionRow } from './missions'
+import type { Mission } from '../types/mission'
 
 export type NgoApplicationSnapshot = {
   id: string
@@ -8,6 +10,116 @@ export type NgoApplicationSnapshot = {
   status: 'pending' | 'approved' | 'rejected' | 'suspended'
   submittedAt: string | null
   rejectionReason: string | null
+}
+
+export type PublicNgo = {
+  id: string
+  name: string
+  description: string
+  mainCity: string
+  logoUrl: string | null
+}
+
+export type PublicNgoProfile = PublicNgo & {
+  websiteUrl: string | null
+  socialLinks: Record<string, string>
+  memberSince: string
+  categories: string[]
+  missionCount: number
+  completedMissionCount: number
+  volunteerParticipationCount: number
+}
+
+export type PublicNgoMission = {
+  mission: Mission
+  status: 'published' | 'completed'
+}
+
+export type FollowedNgo = PublicNgo & {
+  followedAt: string
+}
+
+function getNgoLogoPublicUrl(path: string | null | undefined) {
+  if (!path) return null
+  if (/^https?:\/\//i.test(path)) return path
+  return supabase.storage.from('ngo-logos').getPublicUrl(path).data.publicUrl
+}
+
+export async function searchPublicNgos(query: string): Promise<PublicNgo[]> {
+  const { data, error } = await supabase.rpc('search_public_ngos', { p_query: query.trim() })
+  if (error) throw error
+
+  return (data ?? []).map((row: Record<string, any>) => ({
+    id: row.ngo_id,
+    name: row.name,
+    description: row.description ?? '',
+    mainCity: row.main_city,
+    logoUrl: getNgoLogoPublicUrl(row.logo_path),
+  }))
+}
+
+export async function getPublicNgoProfile(ngoId: string): Promise<{
+  profile: PublicNgoProfile
+  missions: PublicNgoMission[]
+} | null> {
+  const [{ data: profileRows, error: profileError }, { data: missionRows, error: missionError }] = await Promise.all([
+    supabase.rpc('get_public_ngo_profile', { p_ngo_id: ngoId }),
+    supabase.rpc('get_public_ngo_missions', { p_ngo_id: ngoId }),
+  ])
+  if (profileError) throw profileError
+  if (missionError) throw missionError
+
+  const row = profileRows?.[0] as Record<string, any> | undefined
+  if (!row) return null
+
+  return {
+    profile: {
+      id: row.ngo_id,
+      name: row.name,
+      description: row.description ?? '',
+      mainCity: row.main_city,
+      logoUrl: getNgoLogoPublicUrl(row.logo_path),
+      websiteUrl: row.website_url,
+      socialLinks: row.social_links && typeof row.social_links === 'object' ? row.social_links : {},
+      memberSince: row.member_since,
+      categories: row.categories ?? [],
+      missionCount: Number(row.mission_count ?? 0),
+      completedMissionCount: Number(row.completed_mission_count ?? 0),
+      volunteerParticipationCount: Number(row.volunteer_participation_count ?? 0),
+    },
+    missions: (missionRows ?? []).map((missionRow: Record<string, any>) => ({
+      mission: mapMissionRow(missionRow),
+      status: missionRow.mission_status,
+    })),
+  }
+}
+
+export async function isFollowingNgo(ngoId: string) {
+  const { data, error } = await supabase.rpc('is_following_ngo', { p_ngo_id: ngoId })
+  if (error) throw error
+  return Boolean(data)
+}
+
+export async function setNgoFollowed(ngoId: string, followed: boolean) {
+  const { data, error } = await supabase.rpc('set_ngo_followed', {
+    p_ngo_id: ngoId,
+    p_followed: followed,
+  })
+  if (error) throw error
+  return Boolean(data)
+}
+
+export async function getMyFollowedNgos(): Promise<FollowedNgo[]> {
+  const { data, error } = await supabase.rpc('get_my_followed_ngos')
+  if (error) throw error
+  return (data ?? []).map((row: Record<string, any>) => ({
+    id: row.ngo_id,
+    name: row.name,
+    description: row.description ?? '',
+    mainCity: row.main_city,
+    logoUrl: getNgoLogoPublicUrl(row.logo_path),
+    followedAt: row.followed_at,
+  }))
 }
 
 export type NgoApplicationInput = {

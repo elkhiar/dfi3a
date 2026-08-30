@@ -1,6 +1,6 @@
 import { ArrowLeft, Flag, MessageCircle, Send, ShieldCheck, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import {
   getMissionChatContext,
@@ -22,6 +22,7 @@ function formatMessageTime(value: string) {
 
 export function MissionChatPage() {
   const { missionId } = useParams()
+  const location = useLocation()
   const navigate = useNavigate()
   const { isLoading: isAuthLoading, user } = useAuth()
   const [context, setContext] = useState<MissionChatContext | null>(null)
@@ -123,12 +124,20 @@ export function MissionChatPage() {
     }
   }
 
-  const backPath = context ? `/missions/${context.missionSlug}` : '/events'
+  const backPath = `/missions/${context?.missionSlug ?? missionId}`
+  const goBackToMission = () => {
+    if (location.state?.fromMission === true) {
+      navigate(-1)
+      return
+    }
+
+    navigate(backPath, { replace: true })
+  }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-slate-50 text-slate-950 shadow-sm">
       <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
-        <button aria-label="Retour à la mission" className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-700" onClick={() => navigate(backPath)} type="button"><ArrowLeft aria-hidden="true" size={21} /></button>
+        <button aria-label="Retour à la mission" className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-700" onClick={goBackToMission} type="button"><ArrowLeft aria-hidden="true" size={21} /></button>
         <div className="min-w-0 flex-1"><p className="text-[11px] font-semibold text-sky-600">Groupe de la mission</p><h1 className="truncate text-base font-bold">{context?.missionTitle ?? 'Discussion'}</h1></div>
         {context?.canModerate && <span aria-label="Vous modérez ce groupe" className="grid size-9 place-items-center rounded-full bg-sky-50 text-sky-700" title="Modérateur"><ShieldCheck aria-hidden="true" size={19} /></span>}
       </header>
@@ -136,7 +145,7 @@ export function MissionChatPage() {
       {isLoading ? (
         <div className="grid flex-1 place-items-center"><span className="size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></div>
       ) : !context?.canRead ? (
-        <div className="grid flex-1 place-items-center p-6 text-center"><div><span className="mx-auto grid size-16 place-items-center rounded-full bg-sky-100 text-sky-700"><MessageCircle aria-hidden="true" size={28} /></span><h2 className="mt-5 text-xl font-bold">Groupe réservé aux participants</h2><p className="mt-2 text-sm leading-6 text-slate-500">Inscrivez-vous à cette mission pour accéder à sa discussion.</p><button className="mt-6 min-h-12 rounded-full bg-sky-500 px-6 text-sm font-bold text-white" onClick={() => navigate(backPath)} type="button">Voir la mission</button></div></div>
+        <div className="grid flex-1 place-items-center p-6 text-center"><div><span className="mx-auto grid size-16 place-items-center rounded-full bg-sky-100 text-sky-700"><MessageCircle aria-hidden="true" size={28} /></span><h2 className="mt-5 text-xl font-bold">Groupe réservé aux participants</h2><p className="mt-2 text-sm leading-6 text-slate-500">Inscrivez-vous à cette mission pour accéder à sa discussion.</p><button className="mt-6 min-h-12 rounded-full bg-sky-500 px-6 text-sm font-bold text-white" onClick={goBackToMission} type="button">Voir la mission</button></div></div>
       ) : (
         <>
           <section className="flex-1 px-4 py-5" aria-label="Messages du groupe">
