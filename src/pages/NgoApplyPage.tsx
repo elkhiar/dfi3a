@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, CheckCircle2, Clock3, FileCheck2, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Building2, CheckCircle2, Clock3, FileCheck2, LogIn, ShieldAlert } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -161,6 +161,10 @@ function NgoAccountSignup() {
         {errorMessage && <p className="rounded-[16px] bg-rose-50 p-3 text-sm text-rose-700" role="alert">{errorMessage}</p>}
         <button className="min-h-12 w-full rounded-full bg-sky-500 text-sm font-bold text-white disabled:opacity-60" disabled={isSubmitting} type="submit">{isSubmitting ? 'Création…' : 'Créer le compte ONG'}</button>
       </form>
+      <div className="mt-7 border-t border-slate-200 pt-5 text-center">
+        <p className="text-sm font-semibold">Vous avez déjà un compte ONG ?</p>
+        <button className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-sky-300 px-5 text-sm font-bold text-sky-700" onClick={() => navigate('/auth?mode=login&returnTo=%2Fngo%2Fapply')} type="button"><LogIn aria-hidden="true" size={17} />Se connecter</button>
+      </div>
     </main>
   )
 }

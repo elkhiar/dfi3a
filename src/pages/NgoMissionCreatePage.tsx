@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, ImagePlus, Info, ShieldAlert, Sparkles, X } from 'lucide-react'
+import { ArrowLeft, Building2, Check, ImagePlus, Info, LogIn, ShieldAlert, Sparkles, X } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -278,10 +278,10 @@ export function NgoMissionCreatePage() {
     }
   }
 
-  if (!isAuthLoading && !user) return <Blocked />
+  if (!isAuthLoading && !user) return <SignInRequired />
   if (isAuthLoading || isLoading) return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
   if (loadError) return <main className="grid min-h-dvh place-items-center bg-white p-6 text-center"><div><h1 className="text-xl font-bold">Formulaire indisponible</h1><p className="mt-2 text-sm text-slate-500">Les catégories n’ont pas pu être chargées.</p><button className="mt-5 min-h-11 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={() => window.location.reload()} type="button">Réessayer</button></div></main>
-  if (!isApproved) return <Blocked />
+  if (!isApproved) return <ApprovedNgoRequired />
 
   return (
     <main className="mx-auto min-h-dvh w-full max-w-2xl bg-white px-5 pb-12 pt-5 text-slate-950">
@@ -418,7 +418,10 @@ export function NgoMissionCreatePage() {
   )
 }
 
-function Blocked() { return <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center"><div><ShieldAlert className="mx-auto text-sky-500" size={32} /><h1 className="mt-4 text-2xl font-bold">ONG approuvée requise</h1><p className="mt-2 text-sm text-slate-500">Votre organisation doit être validée avant de publier.</p><Link className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" to="/ngo/apply"><ArrowLeft aria-hidden="true" size={18} />Retour à ma demande</Link></div></main> }
+function SignInRequired() {
+  return <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center"><div className="w-full"><LogIn className="mx-auto text-sky-500" size={32} /><h1 className="mt-4 text-2xl font-bold">Connectez-vous à votre compte ONG</h1><p className="mt-2 text-sm leading-6 text-slate-500">La création d’une mission est réservée aux organisations approuvées.</p><Link className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" to="/auth?mode=login&returnTo=%2Fngo%2Fmissions%2Fnew"><LogIn aria-hidden="true" size={18} />Se connecter</Link><Link className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-slate-200 px-5 text-sm font-semibold text-slate-600" to="/ngo/apply"><Building2 aria-hidden="true" size={17} />Créer un compte ONG</Link></div></main>
+}
+function ApprovedNgoRequired() { return <main className="mx-auto grid min-h-dvh max-w-md place-items-center bg-white p-6 text-center"><div><ShieldAlert className="mx-auto text-sky-500" size={32} /><h1 className="mt-4 text-2xl font-bold">ONG approuvée requise</h1><p className="mt-2 text-sm text-slate-500">Votre organisation doit être validée avant de publier.</p><Link className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" to="/ngo/apply"><ArrowLeft aria-hidden="true" size={18} />Voir ma demande</Link></div></main> }
 function Section({ children, title }: { children: React.ReactNode; title: string }) { return <section className="space-y-5 rounded-[24px] border border-slate-200 bg-white p-4"><h2 className="text-lg font-bold">{title}</h2>{children}</section> }
 function FieldLabel({ label, required }: { label: string; required: boolean }) { return <span className="flex items-center justify-between gap-3 text-sm font-semibold"><span>{label}</span><span className={`text-[10px] font-bold uppercase tracking-wide ${required ? 'text-rose-500' : 'text-slate-400'}`}>{required ? 'Obligatoire' : 'Facultatif'}</span></span> }
 function Field({ disabled = false, label, maxLength, min, minLength, name, onInput, placeholder, required = true, step, type = 'text', value }: { disabled?: boolean; label: string; maxLength?: number; min?: string; minLength?: number; name: string; onInput?: React.FormEventHandler<HTMLInputElement>; placeholder?: string; required?: boolean; step?: string; type?: string; value?: string }) { return <label className={`block ${disabled ? 'opacity-45' : ''}`}><FieldLabel label={label} required={required} /><input className="mt-1.5 min-h-12 w-full rounded-[16px] border border-slate-300 px-3 text-base outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100" disabled={disabled} maxLength={maxLength} min={min} minLength={minLength} name={name} onInput={onInput} placeholder={placeholder} required={required} step={step} type={type} value={value} /></label> }
