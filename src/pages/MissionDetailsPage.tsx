@@ -9,6 +9,7 @@ import {
   Gauge,
   Heart,
   MapPin,
+  MessageCircle,
   ShieldAlert,
   UsersRound,
 } from 'lucide-react'
@@ -410,13 +411,15 @@ export function MissionDetailsPage() {
           <button className="min-h-12 flex-1 rounded-full bg-rose-50 px-5 text-sm font-bold text-rose-700" onClick={() => { setViewerErrorKey(''); setViewerAttempt((attempt) => attempt + 1) }} type="button">Réessayer la vérification du compte</button>
         ) : viewerContext.accountType === 'ngo' ? (
           viewerContext.ownsMission && mission.databaseId ? <div className="grid flex-1 grid-cols-2 gap-2">
+            <Link className="col-span-2 flex min-h-12 items-center justify-center gap-2 rounded-full bg-sky-500 px-3 text-center text-xs font-bold text-white" to={`/missions/${mission.databaseId}/chat`}><MessageCircle aria-hidden="true" size={17} />Ouvrir le groupe de discussion</Link>
             <Link className="grid min-h-12 place-items-center rounded-full bg-slate-100 px-3 text-center text-xs font-bold text-slate-700" to={`/ngo/missions/${mission.databaseId}/edit`}>Modifier la mission</Link>
-            <Link className="grid min-h-12 place-items-center rounded-full bg-sky-500 px-3 text-center text-xs font-bold text-white" to={`/ngo/missions/${mission.databaseId}/attendance`}>Gérer les présences</Link>
+            <Link className="grid min-h-12 place-items-center rounded-full bg-slate-100 px-3 text-center text-xs font-bold text-slate-700" to={`/ngo/missions/${mission.databaseId}/attendance`}>Gérer les présences</Link>
             {!hasStarted && <button className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-full border border-rose-200 text-xs font-bold text-rose-600" onClick={() => setIsMissionCancelSheetOpen(true)} type="button"><Ban aria-hidden="true" size={16} />Annuler la mission</button>}
           </div> : <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-sky-500 px-5 text-sm font-bold text-white" to="/ngo/dashboard">Retour à l’espace ONG</Link>
         ) : viewerContext.accountType === 'admin' ? (
           <Link className="grid min-h-12 flex-1 place-items-center rounded-full bg-slate-900 px-5 text-sm font-bold text-white" to="/admin">Retour aux validations</Link>
         ) : <>
+          {isJoined && mission.databaseId && <Link aria-label="Ouvrir le groupe de discussion" className="grid size-12 shrink-0 place-items-center rounded-full border border-sky-500 text-sky-600" to={`/missions/${mission.databaseId}/chat`}><MessageCircle aria-hidden="true" size={20} /></Link>}
           <button
             aria-pressed={isSaved}
             className="grid size-12 shrink-0 place-items-center rounded-full border border-sky-500 text-sky-600"

@@ -12,6 +12,7 @@ const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ defau
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage').then((module) => ({ default: module.LeaderboardPage })))
 const MyEventsPage = lazy(() => import('./pages/MyEventsPage').then((module) => ({ default: module.MyEventsPage })))
 const MissionDetailsPage = lazy(() => import('./pages/MissionDetailsPage').then((module) => ({ default: module.MissionDetailsPage })))
+const MissionChatPage = lazy(() => import('./pages/MissionChatPage').then((module) => ({ default: module.MissionChatPage })))
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage').then((module) => ({ default: module.NotificationsPage })))
 const NgoApplyPage = lazy(() => import('./pages/NgoApplyPage').then((module) => ({ default: module.NgoApplyPage })))
 const NgoDashboardPage = lazy(() => import('./pages/NgoDashboardPage').then((module) => ({ default: module.NgoDashboardPage })))
@@ -39,6 +40,7 @@ export default function App() {
       <Route path="auth/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="auth/reset-password" element={<ResetPasswordPage />} />
       <Route path="missions/:missionId" element={<MissionDetailsPage />} />
+      <Route path="missions/:missionId/chat" element={<MissionChatPage />} />
       <Route path="notifications" element={<NotificationsPage />} />
       <Route path="ngo/apply" element={<NgoApplyPage />} />
       <Route element={<NgoLayout />}>
