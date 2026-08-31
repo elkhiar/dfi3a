@@ -11,7 +11,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
-import { DBuxIcon } from '../components/DBuxIcon'
+import { DBuxAmount } from '../components/DBuxIcon'
 import { MissionCard } from '../components/MissionCard'
 import { NotificationBell } from '../components/NotificationBell'
 import {
@@ -19,7 +19,7 @@ import {
   getPublicMissions,
   setMissionSaved,
 } from '../services/missions'
-import { getMyPointsSummary } from '../services/profiles'
+import { getAvatarPublicUrl, getMyPointsSummary, getMyProfile } from '../services/profiles'
 import type { Mission } from '../types/mission'
 
 type TimeFilter = 'upcoming' | 'today' | 'tomorrow' | 'weekend'
@@ -83,6 +83,7 @@ export function HomePage() {
   const [loadAttempt, setLoadAttempt] = useState(0)
   const [savedMissionIds, setSavedMissionIds] = useState<Set<string>>(new Set())
   const [totalPoints, setTotalPoints] = useState(0)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
     let isCurrent = true
@@ -101,10 +102,15 @@ export function HomePage() {
 
   useEffect(() => {
     if (!user) return
-    void getMySavedMissionIds().then(setSavedMissionIds).catch(() => undefined)
+    let isCurrent = true
+    void getMySavedMissionIds().then((ids) => { if (isCurrent) setSavedMissionIds(ids) }).catch(() => undefined)
     void getMyPointsSummary()
-      .then((summary) => setTotalPoints(summary.totalPoints))
-      .catch(() => setTotalPoints(0))
+      .then((summary) => { if (isCurrent) setTotalPoints(summary.totalPoints) })
+      .catch(() => { if (isCurrent) setTotalPoints(0) })
+    void getMyProfile()
+      .then((profile) => { if (isCurrent) setAvatarUrl(getAvatarPublicUrl(profile.avatarPath)) })
+      .catch(() => { if (isCurrent) setAvatarUrl(null) })
+    return () => { isCurrent = false }
   }, [user])
 
   const timeFilteredMissions = useMemo(() => {
@@ -167,13 +173,10 @@ export function HomePage() {
         </Link>
 
         <div className="flex h-11 items-center rounded-full border border-slate-300 bg-white pl-3 pr-1.5 shadow-sm">
-          <span aria-label={`${totalPoints} D-bux`} className="mr-1.5 flex items-center gap-1.5 text-sm font-semibold text-slate-700">
-            <DBuxIcon className="h-[18px] w-auto" />
-            {totalPoints}
-          </span>
+          <DBuxAmount amount={user ? totalPoints : 0} className="mr-1.5 text-sm font-semibold text-slate-700" iconClassName="h-[18px] w-auto" />
           <NotificationBell />
           <button aria-label="Ouvrir le profil" className="ml-0.5 grid size-8 place-items-center overflow-hidden rounded-full bg-sky-500 text-xs font-bold text-white" onClick={() => navigate('/profile')} type="button">
-            {String(user?.user_metadata?.first_name || user?.email || 'D').slice(0, 1).toUpperCase()}
+            {user && avatarUrl ? <img alt="" className="size-full object-cover" src={avatarUrl} /> : String(user?.user_metadata?.first_name || user?.email || 'D').slice(0, 1).toUpperCase()}
           </button>
         </div>
       </header>

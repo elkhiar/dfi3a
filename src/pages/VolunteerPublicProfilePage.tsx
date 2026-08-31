@@ -2,6 +2,7 @@ import { ArrowLeft, CalendarDays, Check, MapPin, Trophy, UserMinus, UserPlus, X 
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { DBuxAmount } from '../components/DBuxIcon'
 import {
   cancelFriendRequest,
   getFriendshipState,
@@ -114,7 +115,7 @@ export function VolunteerPublicProfilePage() {
       />
       {message && <p className="mt-3 text-center text-xs text-slate-500" role="status">{message}</p>}
 
-      {profile.totalPoints != null && <section className="mt-6 flex items-center gap-3 rounded-[22px] bg-slate-700 p-4 text-white"><span className="grid size-12 place-items-center rounded-full bg-sky-300 text-slate-700"><Trophy aria-hidden="true" size={22} /></span><div><p className="text-xs text-white/60">Points vérifiés</p><p className="mt-0.5 text-2xl font-bold">{profile.totalPoints} <span className="text-sm text-sky-300">pts</span></p></div></section>}
+      {profile.totalPoints != null && <section className="mt-6 flex items-center gap-3 rounded-[22px] bg-slate-700 p-4 text-white"><span className="grid size-12 place-items-center rounded-full bg-sky-300 text-slate-700"><Trophy aria-hidden="true" size={22} /></span><div><p className="text-xs text-white/60">D-bux vérifiés</p><p className="mt-0.5 text-2xl font-bold"><DBuxAmount amount={profile.totalPoints} iconClassName="h-6 w-auto" /></p></div></section>}
 
       <section className="mt-6">
         <h2 className="text-lg font-bold">À propos</h2>

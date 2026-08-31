@@ -13,11 +13,12 @@ import {
   ShieldAlert,
   UsersRound,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AvatarStack } from '../components/AvatarStack'
 import { CancelRegistrationSheet } from '../components/CancelRegistrationSheet'
 import { CancelMissionSheet } from '../components/CancelMissionSheet'
+import { DBuxAmount } from '../components/DBuxIcon'
 import { JoinMissionSheet } from '../components/JoinMissionSheet'
 import { useAuth } from '../auth/auth-context'
 import {
@@ -224,12 +225,12 @@ export function MissionDetailsPage() {
   const registrationClosed = new Date(mission.registrationDeadline).getTime() <= currentTime
   const isFull = remainingPlaces === 0
   const actionDisabled = hasStarted || (!isJoined && (registrationClosed || isFull))
-  const actionLabel = isJoined
+  const actionLabel: ReactNode = isJoined
     ? hasStarted ? 'Mission commencée' : 'Gérer mon inscription'
     : hasStarted ? 'Mission commencée'
       : registrationClosed ? 'Inscriptions closes'
         : isFull ? 'Mission complète'
-          : `Participer · ${mission.points} pts`
+          : <>Participer · <DBuxAmount amount={mission.points} iconClassName="h-3.5 w-auto" /></>
 
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md bg-white pb-28 text-slate-950 shadow-sm">
@@ -321,7 +322,7 @@ export function MissionDetailsPage() {
           <InfoCard
             icon={Gauge}
             label={`Difficulté ${difficultyLabels[mission.difficulty].toLowerCase()}`}
-            value={`${mission.points} points`}
+            value={<DBuxAmount amount={mission.points} />}
             valueClassName="text-sky-600"
           />
         </section>
@@ -397,7 +398,7 @@ export function MissionDetailsPage() {
             <div>
               <h2 className="text-sm font-bold text-amber-950">Conditions d’annulation</h2>
               <p className="mt-1 text-xs leading-5 text-amber-900/75">
-                Annulation gratuite avant la date limite. Une annulation tardive retire 10 points et une absence 25 points.
+                Annulation gratuite avant la date limite. Une annulation tardive retire <DBuxAmount amount="10" iconClassName="h-3.5 w-auto" /> et une absence <DBuxAmount amount="25" iconClassName="h-3.5 w-auto" />.
               </p>
             </div>
           </div>
@@ -494,7 +495,7 @@ export function MissionDetailsPage() {
 type InfoCardProps = {
   icon: typeof CalendarDays
   label: string
-  value: string
+  value: ReactNode
   valueClassName?: string
 }
 

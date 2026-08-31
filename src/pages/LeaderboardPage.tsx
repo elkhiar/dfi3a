@@ -1,5 +1,6 @@
 import { Crown, MapPin, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { DBuxAmount } from '../components/DBuxIcon'
 import { getLeaderboard } from '../services/profiles'
 import type { LeaderboardEntry } from '../services/profiles'
 
@@ -73,7 +74,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
       <span className={`grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold ${entry.rank === 1 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>{entry.rank === 1 ? <Crown aria-hidden="true" size={18} /> : entry.rank}</span>
       <span className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-700 font-bold text-sky-300">{entry.displayName.slice(0, 1).toUpperCase()}</span>
       <div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{entry.displayName}{entry.isCurrentUser && <span className="ml-1 text-xs font-medium text-sky-700">Vous</span>}</p>{entry.city && <p className="mt-1 flex items-center gap-1 text-xs text-slate-500"><MapPin aria-hidden="true" size={12} />{entry.city}</p>}</div>
-      <p className="text-sm font-bold text-sky-600">{entry.points} pts</p>
+      <p className="text-sm font-bold text-sky-600"><DBuxAmount amount={entry.points} /></p>
     </article>
   )
 }

@@ -2,6 +2,7 @@ import { Ban, CalendarDays, CheckCircle2, Clock3, Heart, MapPin, Sparkles, XCirc
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { DBuxAmount } from '../components/DBuxIcon'
 import { getMyJoinedMissions, getMyMissionHistory, getMySavedMissions } from '../services/missions'
 import type { Mission } from '../types/mission'
 import type { VolunteerMissionHistoryEntry } from '../services/missions'
@@ -155,11 +156,11 @@ function HistoryCard({ entry }: { entry: VolunteerMissionHistoryEntry }) {
           ? { icon: XCircle, label: 'Absence', style: 'bg-rose-50 text-rose-700' }
           : { icon: Clock3, label: 'Validation en attente', style: 'bg-sky-50 text-sky-700' }
   const StatusIcon = status.icon
-  const pointLabel = entry.pointsApplied > 0
-    ? `+${entry.pointsApplied} pts`
+  const pointAmount = entry.pointsApplied > 0
+    ? `+${entry.pointsApplied}`
     : entry.pointsApplied < 0
-      ? `−${Math.abs(entry.pointsApplied)} pts`
-      : '0 pt'
+      ? `−${Math.abs(entry.pointsApplied)}`
+      : '0'
 
   return (
     <article className="rounded-[22px] border border-slate-200 bg-white p-3 shadow-sm">
@@ -170,7 +171,7 @@ function HistoryCard({ entry }: { entry: VolunteerMissionHistoryEntry }) {
           <h2 className="mt-2 line-clamp-2 text-sm font-bold leading-tight">{entry.missionTitle}</h2>
           <p className="mt-1 truncate text-xs text-slate-500">{entry.ngoName}</p>
         </div>
-        <span className={`shrink-0 text-xs font-bold ${entry.pointsApplied < 0 ? 'text-rose-600' : entry.pointsApplied > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>{pointLabel}</span>
+        <span className={`shrink-0 text-xs font-bold ${entry.pointsApplied < 0 ? 'text-rose-600' : entry.pointsApplied > 0 ? 'text-emerald-700' : 'text-slate-400'}`}><DBuxAmount amount={pointAmount} iconClassName="h-3.5 w-auto" /></span>
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
         <span>{formatEventDate(entry.startsAt)} · {formatEventTime(entry.startsAt)}</span>
@@ -246,7 +247,7 @@ function JoinedMissionCard({
         </p>
         <div className="mt-2 flex items-center justify-between text-xs">
           <span className="text-slate-500">{formatEventTime(mission.startsAt)}</span>
-          <span className="font-bold text-sky-600">{mission.points} pts</span>
+          <span className="font-bold text-sky-600"><DBuxAmount amount={mission.points} iconClassName="h-3.5 w-auto" /></span>
         </div>
       </div>
     </Link>

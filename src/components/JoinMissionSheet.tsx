@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { DBuxAmount } from './DBuxIcon'
 import { getMissionPrivateDetails } from '../services/missions'
 import type { MissionPrivateDetails } from '../services/missions'
 import { joinMission, JoinMissionError } from '../services/registrations'
@@ -154,7 +155,7 @@ export function JoinMissionSheet({ mission, onClose, onJoined }: JoinMissionShee
             <div className="mt-3 grid grid-cols-2 gap-2">
               <div className="rounded-[18px] border border-slate-200 p-3">
                 <p className="text-xs text-slate-500">Récompense</p>
-                <p className="mt-1 font-bold text-sky-600">{mission.points} points</p>
+                <p className="mt-1 font-bold text-sky-600"><DBuxAmount amount={mission.points} /></p>
               </div>
               <div className="rounded-[18px] border border-slate-200 p-3">
                 <p className="text-xs text-slate-500">Durée estimée</p>
@@ -180,7 +181,7 @@ export function JoinMissionSheet({ mission, onClose, onJoined }: JoinMissionShee
             <div className="mt-4 flex gap-3 rounded-[18px] bg-amber-50 p-3">
               <ShieldAlert aria-hidden="true" className="shrink-0 text-amber-700" size={19} />
               <p className="text-xs leading-5 text-amber-900/80">
-                Annulation tardive : −10 points. Absence non signalée : −25 points.
+                Annulation tardive : <DBuxAmount amount="−10" />. Absence non signalée : <DBuxAmount amount="−25" />.
               </p>
             </div>
 

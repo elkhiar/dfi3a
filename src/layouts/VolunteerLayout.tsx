@@ -41,14 +41,14 @@ export function VolunteerLayout() {
             <li className="min-w-0 shrink-0" key={to}>
               <NavLink
                 aria-label={label}
-                className={({ isActive }) => `flex min-h-11 items-center justify-center gap-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'w-[98px] bg-slate-500 px-1 text-sky-300 min-[380px]:w-[106px]' : 'w-11 text-sky-300 hover:bg-slate-600'}`}
+                className={({ isActive }) => `flex min-h-11 items-center justify-center gap-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'w-[112px] bg-slate-500 px-2 text-sky-300 min-[380px]:w-[124px]' : 'w-11 text-sky-300 hover:bg-slate-600'}`}
                 end={to === '/'}
                 to={to}
               >
                 {({ isActive }) => (
                   <>
                     <span className="grid size-7 shrink-0 place-items-center rounded-md bg-sky-300 text-slate-700"><Icon aria-hidden="true" size={18} strokeWidth={2.5} /></span>
-                    {isActive && <span className="truncate">{label}</span>}
+                    {isActive && <span className="whitespace-nowrap">{label}</span>}
                   </>
                 )}
               </NavLink>

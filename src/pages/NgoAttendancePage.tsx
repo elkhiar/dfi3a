@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { DBuxAmount } from '../components/DBuxIcon'
 import { supabase } from '../lib/supabase'
 import { getMyAccountType } from '../services/ngos'
 import {
@@ -191,7 +192,7 @@ export function NgoAttendancePage() {
           <ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0 text-sky-600" size={20} />
           <div>
             <h2 className="text-sm font-bold text-slate-800">Conséquences après finalisation</h2>
-            <p className="mt-1 text-xs leading-5 text-slate-600">Présent : +{mission.total_points} points · Absent : −{NO_SHOW_PENALTY} points. La finalisation est définitive.</p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">Présent : <DBuxAmount amount={`+${mission.total_points}`} iconClassName="h-3.5 w-auto" /> · Absent : <DBuxAmount amount={`−${NO_SHOW_PENALTY}`} iconClassName="h-3.5 w-auto" />. La finalisation est définitive.</p>
           </div>
         </div>
       </section>
@@ -257,7 +258,7 @@ export function NgoAttendancePage() {
           <section aria-labelledby="attendance-confirm-title" aria-modal="true" className="w-full max-w-md rounded-[28px] bg-white p-5 shadow-2xl" role="dialog">
             <span className="mx-auto block h-1.5 w-12 rounded-full bg-slate-200" />
             <h2 className="mt-5 text-xl font-bold" id="attendance-confirm-title">Confirmer les présences ?</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">{counts.present} bénévole{counts.present === 1 ? '' : 's'} recevront {mission.total_points} points et {counts.absent} auront une pénalité de {NO_SHOW_PENALTY} points. Cette action ne pourra plus être modifiée.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{counts.present} bénévole{counts.present === 1 ? '' : 's'} recevront <DBuxAmount amount={mission.total_points} /> et {counts.absent} auront une pénalité de <DBuxAmount amount={`−${NO_SHOW_PENALTY}`} />. Cette action ne pourra plus être modifiée.</p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button className="min-h-12 rounded-full bg-slate-100 text-sm font-bold text-slate-700" disabled={isUpdating} onClick={() => setIsConfirming(false)} type="button">Revenir</button>
               <button className="min-h-12 rounded-full bg-sky-500 text-sm font-bold text-white disabled:opacity-60" disabled={isUpdating} onClick={() => void finalize()} type="button">{isUpdating ? 'Finalisation…' : 'Confirmer'}</button>

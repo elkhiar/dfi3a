@@ -1,7 +1,8 @@
 import { BellRing, CalendarCheck2, Camera, ChevronRight, Edit3, LogOut, MapPin, Save, Sparkles, Trophy, UsersRound } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { DBuxAmount } from '../components/DBuxIcon'
 import { supabase } from '../lib/supabase'
 import {
   getMyPointsSummary,
@@ -207,14 +208,14 @@ export function ProfilePage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-sky-200">Total vérifié</p>
-            <p className="mt-1 text-3xl font-bold">{points.totalPoints} <span className="text-lg text-sky-300">pts</span></p>
+            <p className="mt-1 text-3xl font-bold"><DBuxAmount amount={points.totalPoints} iconClassName="h-7 w-auto" /></p>
           </div>
           <span className="grid size-12 place-items-center rounded-full bg-sky-300 text-slate-700">
             <Trophy aria-hidden="true" size={23} />
           </span>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/15 pt-4">
-          <Stat icon={Sparkles} label="Ce mois" value={`${points.monthlyPoints} pts`} />
+          <Stat icon={Sparkles} label="Ce mois" value={<DBuxAmount amount={points.monthlyPoints} iconClassName="h-3.5 w-auto" />} />
           <Stat icon={CalendarCheck2} label="Missions validées" value={String(points.completedMissions)} />
         </div>
       </section>
@@ -267,7 +268,7 @@ export function ProfilePage() {
   )
 }
 
-function Stat({ icon: Icon, label, value }: { icon: typeof Trophy; label: string; value: string }) {
+function Stat({ icon: Icon, label, value }: { icon: typeof Trophy; label: string; value: ReactNode }) {
   return <div className="flex items-center gap-2"><Icon aria-hidden="true" className="text-sky-300" size={18} /><div><p className="text-[10px] text-white/60">{label}</p><p className="text-sm font-bold">{value}</p></div></div>
 }
 

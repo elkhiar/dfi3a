@@ -2,6 +2,7 @@ import { LocateFixed, LoaderCircle } from 'lucide-react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
+import { DBuxAmount } from './DBuxIcon'
 import type { Mission } from '../types/mission'
 
 export type MapLocation = {
@@ -221,7 +222,7 @@ export function MissionMap({
       {selectedMission && (
         <button className="absolute inset-x-3 bottom-14 z-10 flex gap-3 rounded-[18px] bg-white p-3 text-left shadow-lg" onClick={() => onOpen(selectedMission)} type="button">
           <img alt="" className="size-16 rounded-[14px] object-cover" src={selectedMission.coverImageUrl} />
-          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{selectedMission.title}</span><span className="mt-1 block text-xs text-slate-500">{selectedMission.generalArea}</span><span className="mt-1 block text-xs font-bold text-sky-600">{selectedMission.points} pts</span></span>
+          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{selectedMission.title}</span><span className="mt-1 block text-xs text-slate-500">{selectedMission.generalArea}</span><span className="mt-1 block text-xs font-bold text-sky-600"><DBuxAmount amount={selectedMission.points} iconClassName="h-3.5 w-auto" /></span></span>
         </button>
       )}
     </section>

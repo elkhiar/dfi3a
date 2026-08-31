@@ -1,5 +1,6 @@
 import { ShieldAlert, X } from 'lucide-react'
 import { useState } from 'react'
+import { DBuxAmount } from './DBuxIcon'
 import { cancelRegistration } from '../services/registrations'
 import type { Mission } from '../types/mission'
 
@@ -38,7 +39,7 @@ export function CancelRegistrationSheet({
         <button aria-label="Fermer" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-slate-100" onClick={onClose} type="button"><X aria-hidden="true" size={18} /></button>
         <ShieldAlert className={isLate ? 'text-rose-600' : 'text-amber-600'} size={29} />
         <h2 className="mt-4 pr-10 text-2xl font-bold">Annuler votre participation ?</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{isLate ? 'La date limite est dépassée. Cette annulation retirera 10 points.' : 'Vous pouvez annuler sans perdre de points avant la date limite.'}</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{isLate ? <>La date limite est dépassée. Cette annulation retirera <DBuxAmount amount="10" />.</> : 'Vous pouvez annuler sans perdre de D-bux avant la date limite.'}</p>
         <label className="mt-5 block"><span className="mb-1.5 block text-sm font-semibold">Motif facultatif</span><textarea className="min-h-24 w-full resize-none rounded-[16px] border border-slate-300 p-3 outline-none focus:border-sky-500" onChange={(event) => setReason(event.target.value)} value={reason} /></label>
         {errorMessage && <p className="mt-3 text-sm text-rose-700" role="alert">{errorMessage}</p>}
         <button className="mt-5 min-h-12 w-full rounded-full bg-rose-600 text-sm font-bold text-white disabled:opacity-60" disabled={isSubmitting} onClick={() => void cancel()} type="button">{isSubmitting ? 'Annulation…' : 'Confirmer l’annulation'}</button>
