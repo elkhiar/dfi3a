@@ -163,7 +163,7 @@ export function HomePage() {
     <div className="overflow-hidden">
       <header className="flex items-center justify-between gap-3 pt-1">
         <Link aria-label="Accueil DFI3A" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to="/">
-          <img alt="DFI3A" className="h-11 w-[104px] object-contain object-left" src="/dfi3a-logo-header.png" />
+          <img alt="DFI3A" className="h-11 w-[104px] object-contain object-left" src="/dfi3a-logo.svg" />
         </Link>
 
         <div className="flex h-11 items-center rounded-full border border-slate-300 bg-white pl-3 pr-1.5 shadow-sm">
