@@ -3,10 +3,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Mission } from '../types/mission'
 import { AvatarStack } from './AvatarStack'
+import { DBuxIcon } from './DBuxIcon'
 
 type MissionCardProps = {
   mission: Mission
-  variant?: 'urgent' | 'standard'
+  variant?: 'urgent' | 'standard' | 'urgentCompact' | 'homeFeed'
   isSaved?: boolean
   onSavedChange?: (saved: boolean) => void
   showSaveButton?: boolean
@@ -50,6 +51,48 @@ export function MissionCard({
     else setLocalSaved(nextSaved)
   }
 
+  if (variant === 'urgentCompact') {
+    return (
+      <article className="group relative isolate aspect-[0.88] w-[174px] shrink-0 snap-start overflow-hidden rounded-[22px] bg-slate-900 text-white shadow-sm">
+        <img alt="" className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.02]" src={mission.coverImageUrl} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/90" />
+        <Link aria-label={`Voir la mission ${mission.title}`} className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white" to={`/missions/${mission.id}`} />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between p-2.5">
+          <span className="rounded-full bg-rose-500 px-2 py-1 text-[9px] font-bold uppercase tracking-wide shadow-sm">Urgent</span>
+          <span className="flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-sm"><DBuxIcon className="h-3.5 w-auto" />{mission.points}</span>
+        </div>
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          <h3 className="line-clamp-2 text-[17px] font-bold leading-[0.98] tracking-[-0.02em]">{mission.title}</h3>
+          <p className="mt-1.5 flex items-center gap-1 truncate text-[9px] text-white/85"><MapPin aria-hidden="true" className="shrink-0" size={10} />{mission.generalArea}, {mission.city}</p>
+          <p className="mt-0.5 flex items-center gap-1 text-[9px] font-semibold text-sky-300"><CalendarDays aria-hidden="true" size={10} />{formatMissionDate(mission.startsAt)}</p>
+        </div>
+      </article>
+    )
+  }
+
+  if (variant === 'homeFeed') {
+    return (
+      <article className="w-full bg-white text-slate-950">
+        <div className="group relative isolate aspect-[1.6] w-full overflow-hidden rounded-[26px] bg-slate-900 shadow-sm">
+          <img alt="" className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.02]" src={mission.coverImageUrl} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/35" />
+          <Link aria-label={`Voir la mission ${mission.title}`} className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white" to={`/missions/${mission.id}`} />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-3">
+            <span className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm"><DBuxIcon className="h-3.5 w-auto" />{mission.points}</span>
+            {showSaveButton && <button aria-label={isSaved ? 'Retirer des favoris' : 'Enregistrer la mission'} aria-pressed={isSaved} className="pointer-events-auto grid size-10 place-items-center rounded-full bg-white/90 text-sky-500 shadow-sm backdrop-blur-sm" onClick={toggleSaved} type="button"><Heart aria-hidden="true" fill={isSaved ? 'currentColor' : 'none'} size={20} /></button>}
+          </div>
+          <span className={`absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold ${categoryStyles[mission.category] ?? 'bg-sky-600'}`}>{mission.category}</span>
+        </div>
+        <div className="px-0.5 pt-3">
+          <Link className="relative z-10 block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to={`/missions/${mission.id}`}><h3 className="text-[20px] font-bold leading-tight tracking-[-0.025em]">{mission.title}</h3></Link>
+          <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-sky-600"><CalendarDays aria-hidden="true" size={13} />{formatMissionDate(mission.startsAt)}</p>
+          <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-slate-500"><MapPin aria-hidden="true" className="shrink-0" size={13} />{mission.generalArea}, {mission.city} · {mission.ngoName}</p>
+          <div className="mt-2.5 flex items-center gap-2"><AvatarStack count={mission.registrationCount} /><span className="text-xs font-semibold text-slate-700">{mission.registrationCount > 0 ? `${mission.registrationCount} participant${mission.registrationCount === 1 ? '' : 's'}` : 'Soyez le premier à participer'}</span></div>
+        </div>
+      </article>
+    )
+  }
+
   if (isUrgent) {
     return (
       <article className="w-full bg-white text-slate-950">
@@ -72,7 +115,7 @@ export function MissionCard({
                 Urgent
               </span>
               <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm">
-                {mission.points} <span className="text-sky-500">✦</span>
+                <DBuxIcon className="inline-block h-3.5 w-auto align-[-2px]" /> {mission.points}
               </span>
             </div>
             {showSaveButton && <button
@@ -139,13 +182,13 @@ export function MissionCard({
           </span>
         ) : (
           <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-800 shadow-sm">
-            {mission.points} <span className="text-sky-500">✦</span>
+            <DBuxIcon className="inline-block h-3.5 w-auto align-[-2px]" /> {mission.points}
           </span>
         )}
 
         {isUrgent ? (
           <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm">
-            {mission.points} <span className="text-sky-500">✦</span>
+            <DBuxIcon className="inline-block h-3.5 w-auto align-[-2px]" /> {mission.points}
           </span>
         ) : (
           showSaveButton ? <button
