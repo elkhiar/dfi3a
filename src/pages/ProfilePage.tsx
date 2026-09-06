@@ -1,4 +1,4 @@
-import { BellRing, CalendarCheck2, Camera, ChevronRight, Edit3, LogOut, MapPin, Save, Sparkles, Trophy, UsersRound } from 'lucide-react'
+import { BellRing, BookOpen, CalendarCheck2, Camera, ChevronRight, Edit3, LogOut, MapPin, Save, Sparkles, Trophy, UsersRound } from 'lucide-react'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
@@ -244,6 +244,7 @@ export function ProfilePage() {
       <div className="mt-5 divide-y divide-slate-100 overflow-hidden rounded-[22px] border border-slate-200 bg-white">
         <Link className="flex min-h-16 items-center gap-3 px-4" to="/friends"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-700"><UsersRound aria-hidden="true" size={19} /></span><span className="min-w-0 flex-1"><strong className="block text-sm">Amis et demandes</strong><span className="mt-0.5 block text-xs text-slate-500">Gérer votre réseau bénévole</span></span><ChevronRight aria-hidden="true" className="text-slate-400" size={19} /></Link>
         <Link className="flex min-h-16 items-center gap-3 px-4" to="/following"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-700"><BellRing aria-hidden="true" size={19} /></span><span className="min-w-0 flex-1"><strong className="block text-sm">ONG suivies</strong><span className="mt-0.5 block text-xs text-slate-500">Gérer vos abonnements</span></span><ChevronRight aria-hidden="true" className="text-slate-400" size={19} /></Link>
+        <Link className="flex min-h-16 items-center gap-3 px-4" state={{ returnTo: '/profile' }} to="/onboarding"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-700"><BookOpen aria-hidden="true" size={19} /></span><span className="min-w-0 flex-1"><strong className="block text-sm">Découvrir DFI3A</strong><span className="mt-0.5 block text-xs text-slate-500">Revoir le tutoriel de l’application</span></span><ChevronRight aria-hidden="true" className="text-slate-400" size={19} /></Link>
       </div>
 
       <section className="mt-6">
