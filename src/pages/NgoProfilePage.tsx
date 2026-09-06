@@ -1,4 +1,4 @@
-import { BookOpen, Building2, CheckCircle2, LogOut, Mail, MapPin, ShieldCheck } from 'lucide-react'
+import { Building2, CheckCircle2, LogOut, Mail, MapPin, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
@@ -43,9 +43,7 @@ export function NgoProfilePage() {
 
       <section className="mt-5 rounded-[22px] bg-white p-4 shadow-sm"><h2 className="font-bold">Contact du compte</h2><p className="mt-3 flex items-center gap-2 text-sm text-slate-600"><Mail aria-hidden="true" size={17} />{user?.email}</p></section>
 
-      <Link className="mt-5 flex min-h-12 items-center justify-center gap-2 rounded-full border border-sky-200 bg-white text-sm font-bold text-sky-700" state={{ returnTo: '/ngo/profile' }} to="/onboarding"><BookOpen aria-hidden="true" size={18} />Revoir le tutoriel DFI3A</Link>
-
-      <Link className="mt-3 flex min-h-12 items-center justify-center rounded-full bg-sky-500 text-sm font-bold text-white" to="/ngo/dashboard">Retour à l’accueil ONG</Link>
+      <Link className="mt-5 flex min-h-12 items-center justify-center rounded-full bg-sky-500 text-sm font-bold text-white" to="/ngo/dashboard">Retour à l’accueil ONG</Link>
       <button className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-rose-200 text-sm font-semibold text-rose-600" onClick={() => void signOut()} type="button"><LogOut aria-hidden="true" size={18} />Se déconnecter</button>
     </div>
   )

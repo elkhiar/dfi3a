@@ -1,6 +1,8 @@
 import { CalendarDays, Home, Search, Trophy, UserRound } from 'lucide-react'
-import { Navigate, NavLink, Outlet } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
+import { APP_TOUR_STORAGE_KEY, AppTour } from '../components/AppTour'
 
 const navigation = [
   { label: 'Accueil', to: '/', icon: Home },
@@ -11,6 +13,14 @@ const navigation = [
 ]
 
 export function VolunteerLayout() {
+  const location = useLocation()
+  const [hasCompletedTour, setHasCompletedTour] = useState(() => {
+    try {
+      return window.localStorage.getItem(APP_TOUR_STORAGE_KEY) === 'completed'
+    } catch {
+      return true
+    }
+  })
   const {
     accountType,
     accountTypeError,
@@ -19,6 +29,15 @@ export function VolunteerLayout() {
     retryAccountType,
     user,
   } = useAuth()
+
+  const completeTour = () => {
+    try {
+      window.localStorage.setItem(APP_TOUR_STORAGE_KEY, 'completed')
+    } catch {
+      // Closing the tutorial must work even when storage is unavailable.
+    }
+    setHasCompletedTour(true)
+  }
 
   if (isAuthLoading || (user && isAccountTypeLoading)) {
     return <LoadingScreen />
@@ -35,7 +54,7 @@ export function VolunteerLayout() {
         <Outlet />
       </main>
 
-      <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-[18px] bg-sky-300 px-1 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 min-[380px]:px-5">
+      <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-[18px] bg-sky-300 px-1 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 min-[380px]:px-5" data-tour="main-navigation">
         <ul className="flex items-center justify-between gap-0 rounded-full border-[5px] border-slate-500 bg-slate-700 p-1.5 shadow-sm min-[380px]:gap-1">
           {navigation.map(({ label, to, icon: Icon }) => (
             <li className="min-w-0 shrink-0" key={to}>
@@ -56,6 +75,7 @@ export function VolunteerLayout() {
           ))}
         </ul>
       </nav>
+      {location.pathname === '/' && !hasCompletedTour && <AppTour onComplete={completeTour} />}
     </div>
   )
 }

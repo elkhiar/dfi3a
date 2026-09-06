@@ -167,7 +167,7 @@ export function HomePage() {
 
   return (
     <div className="overflow-hidden">
-      <header className="flex items-center justify-between gap-3 pt-1">
+      <header className="flex items-center justify-between gap-3 pt-1" data-tour="home-header">
         <Link aria-label="Accueil DFI3A" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to="/">
           <img alt="DFI3A" className="h-11 w-[104px] object-contain object-left" src="/dfi3a-logo.svg" />
         </Link>
@@ -181,7 +181,7 @@ export function HomePage() {
         </div>
       </header>
 
-      <nav aria-label="Filtrer par date" className="scrollbar-none -mr-4 mt-5 flex gap-2 overflow-x-auto pr-4 pb-1">
+      <nav aria-label="Filtrer par date" className="scrollbar-none -mr-4 mt-5 flex gap-2 overflow-x-auto pr-4 pb-1" data-tour="time-filters">
         {timeFilters.map((filter) => {
           const isActive = activeTimeFilter === filter.id
           return <button aria-pressed={isActive} className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-semibold transition ${isActive ? 'bg-sky-500 text-white shadow-sm' : 'bg-white text-slate-700'}`} key={filter.id} onClick={() => setActiveTimeFilter(filter.id)} type="button">{filter.label}</button>
@@ -195,7 +195,7 @@ export function HomePage() {
         </div>
       ) : (
         <>
-          <section className="mt-6" aria-labelledby="urgent-heading">
+          <section className="mt-6" aria-labelledby="urgent-heading" data-tour="urgent-missions">
             <div className="mb-3 flex items-center justify-between">
               <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-500">Besoin immédiat</p><h1 id="urgent-heading" className="mt-0.5 text-xl font-bold tracking-tight">Missions urgentes</h1></div>
               <Link className="grid min-h-11 place-items-center px-1 text-sm text-slate-400" to="/explore?urgent=true&radius=all">Voir tout</Link>
@@ -211,7 +211,7 @@ export function HomePage() {
             )}
           </section>
 
-          {!isLoading && <nav aria-label="Filtrer par catégorie" className="scrollbar-none -mx-4 mt-5 flex overflow-x-auto border-b border-slate-100 px-4">
+          {!isLoading && <nav aria-label="Filtrer par catégorie" className="scrollbar-none -mx-4 mt-5 flex overflow-x-auto border-b border-slate-100 px-4" data-tour="category-filters">
             {homeCategories.map((category) => {
               const isActive = activeCategory === category
               const Icon = categoryIcon(category)
