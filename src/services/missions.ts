@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { getCategoryIllustrationPath } from '../lib/category-illustrations'
 import type { Mission } from '../types/mission'
+import { getAvatarPublicUrl } from './profiles'
 
 export type MissionPrivateDetails = {
   exactAddress: string
@@ -55,11 +56,41 @@ export function mapMissionRow(row: Record<string, any>): Mission {
     isUrgent: row.is_urgent,
     capacity: row.capacity,
     registrationCount: row.registration_count,
+    participantPreviews: [],
     ngoName: row.ngo_name,
     coverImageUrl: row.cover_image_path || getCategoryIllustrationPath(row.category_name || 'other'),
     requirements: row.requirements ?? [],
     accessibility: row.accessibility ?? 'Aucune information d’accessibilité fournie.',
   }
+}
+
+async function attachParticipantPreviews(missions: Mission[]): Promise<Mission[]> {
+  const missionIds = [...new Set(missions.flatMap((mission) => mission.databaseId ? [mission.databaseId] : []))]
+  if (missionIds.length === 0) return missions
+
+  const { data, error } = await supabase.rpc('get_public_mission_participant_previews', {
+    p_mission_ids: missionIds,
+  })
+
+  // Keep mission discovery usable while the matching database migration is being applied.
+  if (error) return missions
+
+  const previewsByMission = new Map<string, Mission['participantPreviews']>()
+  for (const row of data ?? []) {
+    const previews = previewsByMission.get(row.mission_id) ?? []
+    previews.push({
+      displayName: row.display_name || 'Bénévole dfi3a',
+      avatarUrl: getAvatarPublicUrl(row.avatar_path),
+    })
+    previewsByMission.set(row.mission_id, previews)
+  }
+
+  return missions.map((mission) => ({
+    ...mission,
+    participantPreviews: mission.databaseId
+      ? previewsByMission.get(mission.databaseId) ?? []
+      : [],
+  }))
 }
 
 export async function getMissionBySlug(slug: string): Promise<Mission | null> {
@@ -70,7 +101,8 @@ export async function getMissionBySlug(slug: string): Promise<Mission | null> {
   const row = data?.[0]
   if (!row) return null
 
-  return mapMissionRow(row)
+  const [mission] = await attachParticipantPreviews([mapMissionRow(row)])
+  return mission
 }
 
 export async function getMissionViewerContext(missionId: string): Promise<MissionViewerContext> {
@@ -102,9 +134,10 @@ export async function getPublicMissions(): Promise<Mission[]> {
   const { data, error } = await supabase.rpc('get_public_missions')
   if (error) throw error
   const now = Date.now()
-  return (data ?? [])
+  const missions = (data ?? [])
     .map((row: Record<string, any>) => mapMissionRow(row))
     .filter((mission: Mission) => new Date(mission.endsAt).getTime() > now)
+  return attachParticipantPreviews(missions)
 }
 
 export async function setMissionSaved(missionId: string, saved: boolean) {

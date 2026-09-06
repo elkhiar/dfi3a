@@ -387,7 +387,7 @@ export function MissionDetailsPage() {
               <p className="mt-0.5 text-xs text-slate-500">{isJoined ? 'Vous participez à cette mission' : canVolunteerInteract ? 'Rejoignez cette équipe solidaire' : 'Inscriptions enregistrées pour cette mission'}</p>
             </div>
             <div className="rounded-full bg-slate-700 px-2 py-1.5">
-              <AvatarStack count={mission.registrationCount} />
+              <AvatarStack count={mission.registrationCount} participants={mission.participantPreviews} />
             </div>
           </div>
         </ContentSection>

@@ -1,5 +1,10 @@
 export type MissionDifficulty = 'standard' | 'demanding' | 'high'
 
+export type MissionParticipantPreview = {
+  displayName: string
+  avatarUrl: string | null
+}
+
 export type Mission = {
   id: string
   databaseId?: string
@@ -21,6 +26,7 @@ export type Mission = {
   isUrgent: boolean
   capacity: number | null
   registrationCount: number
+  participantPreviews: MissionParticipantPreview[]
   ngoName: string
   coverImageUrl: string
   requirements: string[]

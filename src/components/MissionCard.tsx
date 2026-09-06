@@ -87,7 +87,7 @@ export function MissionCard({
           <Link className="relative z-10 block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to={`/missions/${mission.id}`}><h3 className="text-[20px] font-bold leading-tight tracking-[-0.025em]">{mission.title}</h3></Link>
           <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-sky-600"><CalendarDays aria-hidden="true" size={13} />{formatMissionDate(mission.startsAt)}</p>
           <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-slate-500"><MapPin aria-hidden="true" className="shrink-0" size={13} />{mission.generalArea}, {mission.city} · {mission.ngoName}</p>
-          <div className="mt-2.5 flex items-center gap-2"><AvatarStack count={mission.registrationCount} /><span className="text-xs font-semibold text-slate-700">{mission.registrationCount > 0 ? `${mission.registrationCount} participant${mission.registrationCount === 1 ? '' : 's'}` : 'Soyez le premier à participer'}</span></div>
+          <div className="mt-2.5 flex items-center gap-2"><AvatarStack count={mission.registrationCount} participants={mission.participantPreviews} /><span className="text-xs font-semibold text-slate-700">{mission.registrationCount > 0 ? `${mission.registrationCount} participant${mission.registrationCount === 1 ? '' : 's'}` : 'Soyez le premier à participer'}</span></div>
         </div>
       </article>
     )
@@ -143,7 +143,7 @@ export function MissionCard({
             {mission.generalArea}, {mission.city} · {mission.ngoName}
           </p>
           <div className="mt-3 flex items-center gap-2">
-            <AvatarStack count={mission.registrationCount} />
+            <AvatarStack count={mission.registrationCount} participants={mission.participantPreviews} />
             <span className="text-xs font-semibold text-slate-700">
               {mission.registrationCount > 0
                 ? `${mission.registrationCount} ${mission.registrationCount === 1 ? 'bénévole inscrit' : 'bénévoles inscrits'}`
@@ -243,7 +243,7 @@ export function MissionCard({
               </span>
               <span className="truncate text-[8px] text-white/90">{mission.ngoName}</span>
             </div>
-            <AvatarStack count={mission.registrationCount} />
+            <AvatarStack count={mission.registrationCount} participants={mission.participantPreviews} />
           </div>
         )}
 
@@ -255,7 +255,7 @@ export function MissionCard({
               </span>
               <span className="truncate text-[10px] text-white/90">{mission.ngoName}</span>
             </div>
-            <AvatarStack count={mission.registrationCount} />
+            <AvatarStack count={mission.registrationCount} participants={mission.participantPreviews} />
           </div>
         )}
       </div>
