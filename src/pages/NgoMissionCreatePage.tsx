@@ -31,6 +31,7 @@ import { createNgoMission, deleteMissionImage, getMissionFormOptions, getMyNgoAp
 type Option = { slug: string; name_fr: string }
 type Difficulty = 'standard' | 'demanding' | 'high'
 type RegistrationDeadlinePreset = '30m' | '1h' | '24h' | 'custom'
+type ActivityDurationPreset = '30m' | '45m' | '1h' | '2h' | '3h' | 'custom'
 type RequirementGroup = 'skills' | 'equipment'
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -54,6 +55,7 @@ type StoredDraft = {
   requestUrgent: boolean
   unlimitedCapacity: boolean
   registrationDeadlinePreset: RegistrationDeadlinePreset
+  activityDurationPreset?: ActivityDurationPreset
   address: AddressSelection | null
   difficulty: Difficulty
   difficultyJustification: string
@@ -92,6 +94,15 @@ const registrationDeadlineOptions: Array<{ label: string; value: RegistrationDea
   { value: '24h', label: '24 h avant' }, { value: 'custom', label: 'Autre' },
 ]
 
+const activityDurationOptions: Array<{ label: string; minutes: number | null; value: ActivityDurationPreset }> = [
+  { value: '30m', label: '30 min', minutes: 30 },
+  { value: '45m', label: '45 min', minutes: 45 },
+  { value: '1h', label: '1 h', minutes: 60 },
+  { value: '2h', label: '2 h', minutes: 120 },
+  { value: '3h', label: '3 h', minutes: 180 },
+  { value: 'custom', label: 'Autre', minutes: null },
+]
+
 const requirementGroups: Array<{ description: string; label: string; suggestions: string[]; value: RequirementGroup }> = [
   { value: 'skills', label: 'Compétences spécifiques', description: 'Savoir-faire utiles', suggestions: ['Premiers secours', 'Animation', 'Enseignement ou tutorat', 'Bricolage', 'Jardinage', 'Communication', 'Conduite'] },
   { value: 'equipment', label: 'Matériel à ramener', description: 'Équipement demandé', suggestions: ['Gants de protection', 'Chaussures fermées', 'Tenue adaptée', 'Bouteille d’eau', 'Casquette', 'Protection solaire', 'Téléphone chargé'] },
@@ -117,6 +128,22 @@ function formatPreviewDate(value: string) {
   const date = parseMoroccoDateTimeInput(value)
   if (Number.isNaN(date.getTime())) return 'Date à compléter'
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Casablanca' }).format(date)
+}
+
+function formatMoroccoDateTimeInput(date: Date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Casablanca', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(date)
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value ?? ''
+  return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}`
+}
+
+function calculateSuggestedEnd(startsAtValue: string, preset: ActivityDurationPreset) {
+  const start = parseMoroccoDateTimeInput(startsAtValue)
+  const minutes = activityDurationOptions.find((option) => option.value === preset)?.minutes
+  if (Number.isNaN(start.getTime()) || minutes == null) return ''
+  return formatMoroccoDateTimeInput(new Date(start.getTime() + minutes * 60_000))
 }
 
 function slugify(value: string) {
@@ -155,6 +182,8 @@ export function NgoMissionCreatePage() {
   const [requestUrgent, setRequestUrgent] = useState(initialDraft?.requestUrgent ?? false)
   const [unlimitedCapacity, setUnlimitedCapacity] = useState(initialDraft?.unlimitedCapacity ?? false)
   const [registrationDeadlinePreset, setRegistrationDeadlinePreset] = useState<RegistrationDeadlinePreset>(initialDraft?.registrationDeadlinePreset ?? '1h')
+  const [activityDurationPreset, setActivityDurationPreset] = useState<ActivityDurationPreset>(initialDraft?.activityDurationPreset ?? (initialDraft?.formValues.endsAt ? 'custom' : '1h'))
+  const [minimumStartValue] = useState(() => formatMoroccoDateTimeInput(new Date(Math.ceil((Date.now() + 2 * 60 * 60_000) / 60_000) * 60_000)))
   const [image, setImage] = useState<File | null>(null)
   const [address, setAddress] = useState<AddressSelection | null>(initialDraft?.address ?? null)
   const [difficulty, setDifficulty] = useState<Difficulty>(initialDraft?.difficulty ?? 'standard')
@@ -202,9 +231,9 @@ export function NgoMissionCreatePage() {
 
   useEffect(() => {
     if (isLoading) return
-    const draft: StoredDraft = { formValues, selectedCategory, selectedTags, requestUrgent, unlimitedCapacity, registrationDeadlinePreset, address, difficulty, difficultyJustification, selectedRequirements, selectedAccessibility, customAccessibility }
+    const draft: StoredDraft = { formValues, selectedCategory, selectedTags, requestUrgent, unlimitedCapacity, registrationDeadlinePreset, activityDurationPreset, address, difficulty, difficultyJustification, selectedRequirements, selectedAccessibility, customAccessibility }
     try { window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft)) } catch { /* Draft persistence is optional. */ }
-  }, [address, customAccessibility, difficulty, difficultyJustification, formValues, isLoading, registrationDeadlinePreset, requestUrgent, selectedAccessibility, selectedCategory, selectedRequirements, selectedTags, unlimitedCapacity])
+  }, [activityDurationPreset, address, customAccessibility, difficulty, difficultyJustification, formValues, isLoading, registrationDeadlinePreset, requestUrgent, selectedAccessibility, selectedCategory, selectedRequirements, selectedTags, unlimitedCapacity])
 
   const updateField = (name: keyof FormValues, value: string) => setFormValues((current) => ({ ...current, [name]: value }))
   const showStepError = (message: string) => { setErrorMessage(message); window.scrollTo({ top: 0, behavior: 'smooth' }); return false }
@@ -220,7 +249,7 @@ export function NgoMissionCreatePage() {
       const startsAt = parseMoroccoDateTimeInput(formValues.startsAt)
       if (!address) return showStepError('Sélectionnez une adresse dans les suggestions.')
       if (Number.isNaN(startsAt.getTime()) || calculatedDurationMinutes == null) return showStepError('Ajoutez un début et une fin valides.')
-      if (startsAt <= new Date()) return showStepError('Le début de la mission doit être dans le futur.')
+      if (startsAt.getTime() < new Date().getTime() + 2 * 60 * 60_000) return showStepError('La mission doit être publiée au moins 2 heures avant son début.')
     }
     if (targetStep === 3) {
       if (!unlimitedCapacity && (!Number.isInteger(Number(formValues.capacity)) || Number(formValues.capacity) < 1)) return showStepError('Indiquez un nombre de places supérieur à zéro ou choisissez les places illimitées.')
@@ -246,6 +275,19 @@ export function NgoMissionCreatePage() {
     if (!validateStep(step) || step === 5) return
     setStep((step + 1) as Step)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const updateStartDate = (value: string) => {
+    setFormValues((current) => ({
+      ...current,
+      startsAt: value,
+      endsAt: activityDurationPreset === 'custom' ? current.endsAt : calculateSuggestedEnd(value, activityDurationPreset),
+    }))
+  }
+
+  const chooseActivityDuration = (preset: ActivityDurationPreset) => {
+    setActivityDurationPreset(preset)
+    if (preset !== 'custom') setFormValues((current) => ({ ...current, endsAt: calculateSuggestedEnd(current.startsAt, preset) }))
   }
 
   const goBack = () => {
@@ -348,7 +390,7 @@ export function NgoMissionCreatePage() {
 
         {step === 2 && <div className="mt-7 space-y-6">
           <Section icon={MapPin} title="Lieu de rendez-vous"><AddressAutocomplete onSelect={setAddress} selection={address} /><div className="flex items-start gap-2 rounded-[16px] bg-sky-50 p-3 text-xs leading-5 text-sky-800"><Info aria-hidden="true" className="mt-0.5 shrink-0" size={15} />L’adresse exacte sera uniquement révélée aux bénévoles inscrits. Les autres verront une zone approximative.</div></Section>
-          <Section icon={CalendarDays} title="Date et horaires"><p className="text-xs text-slate-500">Heure de Casablanca</p><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><Field label="Début" onChange={(value) => updateField('startsAt', value)} type="datetime-local" value={formValues.startsAt} /><Field label="Fin" onChange={(value) => updateField('endsAt', value)} type="datetime-local" value={formValues.endsAt} /></div><div className={`flex items-center justify-between gap-3 rounded-[18px] p-4 ${calculatedDurationMinutes == null ? 'bg-slate-50 text-slate-500' : 'bg-emerald-50 text-emerald-800'}`}><span className="flex items-center gap-2 text-sm font-semibold"><Clock3 aria-hidden="true" size={17} />Durée</span><strong className="text-sm">{calculatedDurationMinutes == null ? 'Automatique' : formatDuration(calculatedDurationMinutes)}</strong></div></Section>
+          <Section icon={CalendarDays} title="Date et horaires"><p className="text-xs leading-5 text-slate-500">Heure de Casablanca · prévoyez au moins 2 heures entre la publication et le début.</p><Field label="Début de la mission" min={minimumStartValue} onChange={updateStartDate} type="datetime-local" value={formValues.startsAt} /><div><FieldLabel label="Durée prévue" required /><div className="mt-3 grid grid-cols-3 gap-2">{activityDurationOptions.map((option) => <ChoiceButton active={activityDurationPreset === option.value} key={option.value} label={option.label} onClick={() => chooseActivityDuration(option.value)} />)}</div></div>{activityDurationPreset === 'custom' && <Field label="Fin de la mission" min={formValues.startsAt || minimumStartValue} onChange={(value) => updateField('endsAt', value)} type="datetime-local" value={formValues.endsAt} />}{activityDurationPreset !== 'custom' && <div className={`flex items-center justify-between gap-3 rounded-[18px] p-4 ${calculatedDurationMinutes == null ? 'bg-slate-50 text-slate-500' : 'bg-emerald-50 text-emerald-800'}`}><span className="flex items-center gap-2 text-sm font-semibold"><Clock3 aria-hidden="true" size={17} />Fin calculée</span><strong className="text-right text-sm">{formValues.endsAt ? formatPreviewDate(formValues.endsAt) : 'Choisissez le début'}</strong></div>}</Section>
         </div>}
 
         {step === 3 && <div className="mt-7 space-y-6">
