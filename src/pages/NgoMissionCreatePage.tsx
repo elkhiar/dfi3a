@@ -71,7 +71,14 @@ const emptyRequirements: Record<RequirementGroup, string[]> = { skills: [], equi
 function loadDraft(): StoredDraft | null {
   try {
     const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY)
-    return raw ? JSON.parse(raw) as StoredDraft : null
+    if (!raw) return null
+    const draft = JSON.parse(raw) as StoredDraft
+    const savedStart = parseMoroccoDateTimeInput(draft.formValues.startsAt)
+    if (!Number.isNaN(savedStart.getTime()) && savedStart.getTime() < new Date().getTime() + 2 * 60 * 60_000) {
+      draft.formValues.startsAt = ''
+      draft.formValues.endsAt = ''
+    }
+    return draft
   } catch { return null }
 }
 
@@ -183,7 +190,7 @@ export function NgoMissionCreatePage() {
   const [unlimitedCapacity, setUnlimitedCapacity] = useState(initialDraft?.unlimitedCapacity ?? false)
   const [registrationDeadlinePreset, setRegistrationDeadlinePreset] = useState<RegistrationDeadlinePreset>(initialDraft?.registrationDeadlinePreset ?? '1h')
   const [activityDurationPreset, setActivityDurationPreset] = useState<ActivityDurationPreset>(initialDraft?.activityDurationPreset ?? (initialDraft?.formValues.endsAt ? 'custom' : '1h'))
-  const [minimumStartValue] = useState(() => formatMoroccoDateTimeInput(new Date(Math.ceil((Date.now() + 2 * 60 * 60_000) / 60_000) * 60_000)))
+  const [minimumStartInstant] = useState(() => Math.ceil((new Date().getTime() + 2 * 60 * 60_000) / 60_000) * 60_000)
   const [image, setImage] = useState<File | null>(null)
   const [address, setAddress] = useState<AddressSelection | null>(initialDraft?.address ?? null)
   const [difficulty, setDifficulty] = useState<Difficulty>(initialDraft?.difficulty ?? 'standard')
@@ -205,6 +212,9 @@ export function NgoMissionCreatePage() {
   const estimatedPoints = calculatedDurationMinutes ? Math.round(Math.ceil(calculatedDurationMinutes / 60) * 40 * pointsMultiplier) : 0
   const activeRequirementOptions = requirementGroups.find((group) => group.value === activeRequirementGroup)
   const selectedCategoryName = categories.find((category) => category.slug === selectedCategory)?.name_fr ?? 'Catégorie'
+  const minimumStartValue = formatMoroccoDateTimeInput(new Date(minimumStartInstant))
+  const selectedStartInstant = parseMoroccoDateTimeInput(formValues.startsAt).getTime()
+  const startIsBelowMinimum = formValues.startsAt !== '' && !Number.isNaN(selectedStartInstant) && selectedStartInstant < minimumStartInstant
   const imagePreviewUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image])
   const coverPreview = imagePreviewUrl ?? getCategoryIllustrationPath(selectedCategory)
   const currentStep = steps[step - 1]
@@ -390,7 +400,7 @@ export function NgoMissionCreatePage() {
 
         {step === 2 && <div className="mt-7 space-y-6">
           <Section icon={MapPin} title="Lieu de rendez-vous"><AddressAutocomplete onSelect={setAddress} selection={address} /><div className="flex items-start gap-2 rounded-[16px] bg-sky-50 p-3 text-xs leading-5 text-sky-800"><Info aria-hidden="true" className="mt-0.5 shrink-0" size={15} />L’adresse exacte sera uniquement révélée aux bénévoles inscrits. Les autres verront une zone approximative.</div></Section>
-          <Section icon={CalendarDays} title="Date et horaires"><p className="text-xs leading-5 text-slate-500">Heure de Casablanca · prévoyez au moins 2 heures entre la publication et le début.</p><Field label="Début de la mission" min={minimumStartValue} onChange={updateStartDate} type="datetime-local" value={formValues.startsAt} /><div><FieldLabel label="Durée prévue" required /><div className="mt-3 grid grid-cols-3 gap-2">{activityDurationOptions.map((option) => <ChoiceButton active={activityDurationPreset === option.value} key={option.value} label={option.label} onClick={() => chooseActivityDuration(option.value)} />)}</div></div>{activityDurationPreset === 'custom' && <Field label="Fin de la mission" min={formValues.startsAt || minimumStartValue} onChange={(value) => updateField('endsAt', value)} type="datetime-local" value={formValues.endsAt} />}{activityDurationPreset !== 'custom' && <div className={`flex items-center justify-between gap-3 rounded-[18px] p-4 ${calculatedDurationMinutes == null ? 'bg-slate-50 text-slate-500' : 'bg-emerald-50 text-emerald-800'}`}><span className="flex items-center gap-2 text-sm font-semibold"><Clock3 aria-hidden="true" size={17} />Fin calculée</span><strong className="text-right text-sm">{formValues.endsAt ? formatPreviewDate(formValues.endsAt) : 'Choisissez le début'}</strong></div>}</Section>
+          <Section icon={CalendarDays} title="Date et horaires"><p className="text-xs leading-5 text-slate-500">Heure de Casablanca · la première heure disponible correspond à maintenant + 2 heures.</p><Field label="Début de la mission" min={minimumStartValue} onChange={updateStartDate} type="datetime-local" value={formValues.startsAt} />{startIsBelowMinimum && <p className="rounded-[14px] bg-rose-50 p-3 text-xs font-semibold text-rose-700" role="alert">Choisissez une date et une heure situées au moins 2 heures dans le futur.</p>}<div><FieldLabel label="Durée prévue" required /><div className="mt-3 grid grid-cols-3 gap-2">{activityDurationOptions.map((option) => <ChoiceButton active={activityDurationPreset === option.value} key={option.value} label={option.label} onClick={() => chooseActivityDuration(option.value)} />)}</div></div>{activityDurationPreset === 'custom' && <Field label="Fin de la mission" min={formValues.startsAt || minimumStartValue} onChange={(value) => updateField('endsAt', value)} type="datetime-local" value={formValues.endsAt} />}{activityDurationPreset !== 'custom' && <div className={`flex items-center justify-between gap-3 rounded-[18px] p-4 ${calculatedDurationMinutes == null ? 'bg-slate-50 text-slate-500' : 'bg-emerald-50 text-emerald-800'}`}><span className="flex items-center gap-2 text-sm font-semibold"><Clock3 aria-hidden="true" size={17} />Fin calculée</span><strong className="text-right text-sm">{formValues.endsAt ? formatPreviewDate(formValues.endsAt) : 'Choisissez le début'}</strong></div>}</Section>
         </div>}
 
         {step === 3 && <div className="mt-7 space-y-6">
