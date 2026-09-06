@@ -130,8 +130,12 @@ export function HomePage() {
   }, [timeFilteredMissions])
 
   const urgentMissions = timeFilteredMissions.filter((mission) => mission.isUrgent).slice(0, 6)
+  const interests = Array.isArray(user?.user_metadata?.interests)
+    ? user.user_metadata.interests.filter((item: unknown): item is string => typeof item === 'string')
+    : []
   const visibleMissions = timeFilteredMissions
     .filter((mission) => !mission.isUrgent && (activeCategory === 'Tout' || mission.category === activeCategory))
+    .sort((first, second) => Number(interests.includes(second.category)) - Number(interests.includes(first.category)))
     .slice(0, 12)
 
   const updateSaved = async (mission: Mission, saved: boolean) => {

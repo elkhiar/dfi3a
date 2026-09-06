@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getSafeReturnTo } from '../lib/navigation'
 import { supabase } from '../lib/supabase'
+import { syncVolunteerSignupProfile } from '../lib/auth-signup'
 
 export function AuthCallbackPage() {
   const [searchParams] = useSearchParams()
@@ -43,6 +44,7 @@ export function AuthCallbackPage() {
       const { data } = await supabase.auth.getSession()
 
       if (data.session) {
+        await syncVolunteerSignupProfile(data.session.user).catch(() => undefined)
         navigate(returnTo, { replace: true })
       } else {
         setErrorMessage('Le lien de confirmation est invalide ou a expiré.')
