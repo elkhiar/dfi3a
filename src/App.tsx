@@ -21,6 +21,7 @@ const NgoDashboardPage = lazy(() => import('./pages/NgoDashboardPage').then((mod
 const NgoMissionCreatePage = lazy(() => import('./pages/NgoMissionCreatePage').then((module) => ({ default: module.NgoMissionCreatePage })))
 const NgoMissionEditPage = lazy(() => import('./pages/NgoMissionEditPage').then((module) => ({ default: module.NgoMissionEditPage })))
 const NgoMissionsPage = lazy(() => import('./pages/NgoMissionsPage').then((module) => ({ default: module.NgoMissionsPage })))
+const NgoMessagesPage = lazy(() => import('./pages/NgoMessagesPage').then((module) => ({ default: module.NgoMessagesPage })))
 const NgoProfilePage = lazy(() => import('./pages/NgoProfilePage').then((module) => ({ default: module.NgoProfilePage })))
 const NgoPublicProfilePage = lazy(() => import('./pages/NgoPublicProfilePage').then((module) => ({ default: module.NgoPublicProfilePage })))
 const NgoAttendancePage = lazy(() => import('./pages/NgoAttendancePage').then((module) => ({ default: module.NgoAttendancePage })))
@@ -54,6 +55,7 @@ export default function App() {
       <Route element={<NgoLayout />}>
         <Route path="ngo/dashboard" element={<NgoDashboardPage />} />
         <Route path="ngo/missions" element={<NgoMissionsPage />} />
+        <Route path="ngo/messages" element={<NgoMessagesPage />} />
         <Route path="ngo/leaderboard" element={<LeaderboardPage />} />
         <Route path="ngo/profile" element={<NgoProfilePage />} />
       </Route>

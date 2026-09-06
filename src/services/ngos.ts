@@ -7,9 +7,25 @@ export type NgoApplicationSnapshot = {
   name: string
   description: string
   mainCity: string
+  logoUrl: string | null
   status: 'pending' | 'approved' | 'rejected' | 'suspended'
   submittedAt: string | null
   rejectionReason: string | null
+}
+
+export type NgoOwnedMission = {
+  id: string
+  slug: string
+  title: string
+  city: string
+  starts_at: string
+  ends_at: string
+  status: 'draft' | 'published' | 'completed' | 'cancelled'
+  urgency_status: 'none' | 'pending' | 'approved' | 'rejected'
+  total_points: number
+  capacity: number | null
+  cover_image_path: string | null
+  registration_count: number
 }
 
 export type PublicNgo = {
@@ -157,7 +173,7 @@ export async function getMyNgoApplication(): Promise<NgoApplicationSnapshot | nu
 
   const { data, error } = await supabase
     .from('ngos')
-    .select('id, name, description, main_city, status, ngo_applications(submitted_at, rejection_reason)')
+    .select('id, name, description, main_city, logo_path, status, ngo_applications(submitted_at, rejection_reason)')
     .eq('owner_user_id', authData.user.id)
     .maybeSingle()
 
@@ -173,6 +189,7 @@ export async function getMyNgoApplication(): Promise<NgoApplicationSnapshot | nu
     name: data.name,
     description: data.description ?? '',
     mainCity: data.main_city,
+    logoUrl: getNgoLogoPublicUrl(data.logo_path),
     status: data.status,
     submittedAt: application?.submitted_at ?? null,
     rejectionReason: application?.rejection_reason ?? null,
@@ -404,18 +421,29 @@ export async function updateNgoMission(input: NgoMissionUpdateInput) {
   return data?.[0]
 }
 
-export async function getMyNgoMissions() {
+export async function getMyNgoMissions(): Promise<NgoOwnedMission[]> {
   const { data: authData, error: authError } = await supabase.auth.getUser()
   if (authError) throw authError
   if (!authData.user) return []
 
-  const { data, error } = await supabase
-    .from('missions')
-    .select('id, slug, title, starts_at, status, urgency_status, total_points, capacity, ngos!inner(owner_user_id)')
-    .eq('ngos.owner_user_id', authData.user.id)
-    .order('starts_at', { ascending: true })
+  const [{ data, error }, { data: publicMissions }] = await Promise.all([
+    supabase
+      .from('missions')
+      .select('id, slug, title, city, starts_at, ends_at, status, urgency_status, total_points, capacity, cover_image_path, ngos!inner(owner_user_id)')
+      .eq('ngos.owner_user_id', authData.user.id)
+      .order('starts_at', { ascending: true }),
+    supabase.rpc('get_public_missions'),
+  ])
   if (error) throw error
-  return data ?? []
+
+  const registrationCounts = new Map<string, number>(
+    (publicMissions ?? []).map((mission: Record<string, any>) => [String(mission.id), Number(mission.registration_count ?? 0)]),
+  )
+
+  return (data ?? []).map((mission) => ({
+    ...mission,
+    registration_count: registrationCounts.get(mission.id) ?? 0,
+  })) as NgoOwnedMission[]
 }
 
 export async function cancelNgoMission(missionId: string, reason: string) {

@@ -1,4 +1,4 @@
-import { CalendarDays, Home, Plus, Trophy, UserRound } from 'lucide-react'
+import { CalendarDays, Home, MessageCircle, Plus, UserRound } from 'lucide-react'
 import { Navigate, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 
@@ -6,7 +6,7 @@ const navigation = [
   { label: 'Accueil', to: '/ngo/dashboard', icon: Home },
   { label: 'Missions', to: '/ngo/missions', icon: CalendarDays },
   { label: 'Publier', to: '/ngo/missions/new', icon: Plus, primary: true },
-  { label: 'Classement', to: '/ngo/leaderboard', icon: Trophy },
+  { label: 'Messages', to: '/ngo/messages', icon: MessageCircle },
   { label: 'Profil', to: '/ngo/profile', icon: UserRound },
 ]
 
@@ -23,16 +23,17 @@ export function NgoLayout() {
 
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md bg-slate-50 text-slate-950 shadow-sm">
-      <main className="min-h-dvh px-4 pb-32 pt-5"><Outlet /></main>
-      <nav aria-label="Navigation ONG" className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-[18px] bg-sky-300 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-        <ul className="flex items-center justify-between gap-1 rounded-full border-[5px] border-slate-500 bg-slate-700 p-1.5 shadow-sm">
+      <main className="min-h-dvh px-4 pb-28 pt-5"><Outlet /></main>
+      <nav aria-label="Navigation ONG" className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md border-t border-slate-100 bg-white/95 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+        <ul className="grid grid-cols-5 items-end gap-1">
           {navigation.map(({ icon: Icon, label, primary, to }) => (
-            <li className="shrink-0" key={to}>
+            <li className="min-w-0" key={to}>
               <NavLink aria-label={label} className={({ isActive }) => primary
-                ? 'grid size-12 -translate-y-2 place-items-center rounded-full bg-sky-300 text-slate-700 shadow-md ring-4 ring-slate-700'
-                : `grid size-11 place-items-center rounded-full transition ${isActive ? 'bg-slate-500 text-sky-300' : 'text-sky-300'}`
+                ? 'mx-auto flex w-full -translate-y-2 flex-col items-center gap-1 text-[9px] font-bold text-sky-600'
+                : `flex min-h-14 w-full flex-col items-center justify-center gap-1 rounded-2xl text-[9px] font-semibold transition ${isActive ? 'bg-sky-50 text-sky-600' : 'text-slate-400'}`
               } to={to}>
-                <Icon aria-hidden="true" size={primary ? 25 : 20} strokeWidth={2.5} />
+                {primary ? <span className="grid size-12 place-items-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-200"><Icon aria-hidden="true" size={25} strokeWidth={2.5} /></span> : <Icon aria-hidden="true" size={20} strokeWidth={2.3} />}
+                <span className="truncate">{label}</span>
               </NavLink>
             </li>
           ))}

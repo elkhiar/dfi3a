@@ -201,7 +201,7 @@ function NgoApplicationForm({ onSubmitted, userId }: { onSubmitted: (application
         phone: values('phone'), registrationNumber: values('registrationNumber'),
         registrationDocumentPath: documentPath,
       })
-      onSubmitted({ id: result.ngo_id, name: values('name'), description: values('description'), mainCity: values('mainCity'), status: 'pending', submittedAt: new Date().toISOString(), rejectionReason: null })
+      onSubmitted({ id: result.ngo_id, name: values('name'), description: values('description'), mainCity: values('mainCity'), logoUrl: null, status: 'pending', submittedAt: new Date().toISOString(), rejectionReason: null })
     } catch (error) {
       if (uploadedDocumentPath) void deleteNgoDocument(uploadedDocumentPath).catch(() => undefined)
       const message =
