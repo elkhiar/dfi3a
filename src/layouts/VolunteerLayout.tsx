@@ -54,7 +54,7 @@ export function VolunteerLayout() {
         <Outlet />
       </main>
 
-      <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-[18px] bg-sky-300 px-1 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 min-[380px]:px-5" data-tour="main-navigation">
+      <nav aria-label="Navigation principale" className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 transform-gpu rounded-t-[18px] bg-sky-300 px-1 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] min-[380px]:px-5" data-tour="main-navigation">
         <ul className="flex items-center justify-between gap-0 rounded-full border-[5px] border-slate-500 bg-slate-700 p-1.5 shadow-sm min-[380px]:gap-1">
           {navigation.map(({ label, to, icon: Icon }) => (
             <li className="min-w-0 shrink-0" key={to}>

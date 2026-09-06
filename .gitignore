@@ -11,10 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
 .npm-cache
 .wrangler
+.xdg-config
 .dev.vars*
 .openai/*.tar.gz
+coverage
 
 # Editor directories and files
 .vscode/*

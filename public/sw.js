@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dfi3a-shell-v1'
+const CACHE_NAME = 'dfi3a-shell-v2'
 const APP_SHELL = [
   '/',
   '/manifest.webmanifest',

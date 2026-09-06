@@ -24,7 +24,7 @@ export function NgoLayout() {
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md bg-slate-50 text-slate-950 shadow-sm">
       <main className="min-h-dvh px-4 pb-28 pt-5"><Outlet /></main>
-      <nav aria-label="Navigation ONG" className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md border-t border-slate-100 bg-white/95 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <nav aria-label="Navigation ONG" className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 transform-gpu border-t border-slate-100 bg-white/95 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl">
         <ul className="grid grid-cols-5 items-end gap-1">
           {navigation.map(({ icon: Icon, label, primary, to }) => (
             <li className="min-w-0" key={to}>

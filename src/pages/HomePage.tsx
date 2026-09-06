@@ -176,13 +176,19 @@ export function HomePage() {
           <img alt="DFI3A" className="h-11 w-[104px] object-contain object-left" src="/dfi3a-logo.svg" />
         </Link>
 
-        <div className="flex h-11 items-center rounded-full border border-slate-300 bg-white pl-3 pr-1.5 shadow-sm">
-          <span data-tour="points-wallet"><DBuxAmount amount={user ? totalPoints : 0} className="mr-1.5 text-sm font-semibold text-slate-700" iconClassName="h-[18px] w-auto" /></span>
-          <span data-tour="notifications"><NotificationBell /></span>
-          <button aria-label="Ouvrir le profil" className="ml-0.5 grid size-8 place-items-center overflow-hidden rounded-full bg-sky-500 text-xs font-bold text-white" onClick={() => navigate('/profile')} type="button">
-            {user && avatarUrl ? <img alt="" className="size-full object-cover" src={avatarUrl} /> : String(user?.user_metadata?.first_name || user?.email || 'D').slice(0, 1).toUpperCase()}
-          </button>
-        </div>
+        {user ? (
+          <div className="flex h-11 items-center rounded-full border border-slate-300 bg-white pl-3 pr-1.5 shadow-sm">
+            <span data-tour="points-wallet"><DBuxAmount amount={totalPoints} className="mr-1.5 text-sm font-semibold text-slate-700" iconClassName="h-[18px] w-auto" /></span>
+            <span data-tour="notifications"><NotificationBell /></span>
+            <button aria-label="Ouvrir le profil" className="ml-0.5 grid size-8 place-items-center overflow-hidden rounded-full bg-sky-500 text-xs font-bold text-white" onClick={() => navigate('/profile')} type="button">
+              {avatarUrl ? <img alt="" className="size-full object-cover" src={avatarUrl} /> : String(user.user_metadata?.first_name || user.email || 'D').slice(0, 1).toUpperCase()}
+            </button>
+          </div>
+        ) : (
+          <Link className="inline-flex min-h-11 items-center rounded-full bg-slate-900 px-5 text-sm font-bold text-white transition hover:bg-slate-800" to="/auth?mode=login&returnTo=%2F">
+            Se connecter
+          </Link>
+        )}
       </header>
 
       <nav aria-label="Filtrer par date" className="scrollbar-none -mr-4 mt-5 flex gap-2 overflow-x-auto pr-4 pb-1" data-tour="time-filters">

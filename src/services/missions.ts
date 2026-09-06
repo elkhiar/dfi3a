@@ -3,6 +3,10 @@ import { getCategoryIllustrationPath } from '../lib/category-illustrations'
 import type { Mission } from '../types/mission'
 import { getAvatarPublicUrl } from './profiles'
 
+const PUBLIC_MISSIONS_CACHE_TTL_MS = 30_000
+let publicMissionsCache: { expiresAt: number; missions: Mission[] } | null = null
+let publicMissionsRequest: Promise<Mission[]> | null = null
+
 export type MissionPrivateDetails = {
   exactAddress: string
   meetingInstructions: string
@@ -131,13 +135,31 @@ export async function getMissionViewerContext(missionId: string): Promise<Missio
 }
 
 export async function getPublicMissions(): Promise<Mission[]> {
-  const { data, error } = await supabase.rpc('get_public_missions')
-  if (error) throw error
   const now = Date.now()
-  const missions = (data ?? [])
-    .map((row: Record<string, any>) => mapMissionRow(row))
-    .filter((mission: Mission) => new Date(mission.endsAt).getTime() > now)
-  return attachParticipantPreviews(missions)
+  if (publicMissionsCache && publicMissionsCache.expiresAt > now) {
+    return publicMissionsCache.missions
+  }
+  if (publicMissionsRequest) return publicMissionsRequest
+
+  publicMissionsRequest = (async () => {
+    const { data, error } = await supabase.rpc('get_public_missions')
+    if (error) throw error
+    const missions = (data ?? [])
+      .map((row: Record<string, any>) => mapMissionRow(row))
+      .filter((mission: Mission) => new Date(mission.endsAt).getTime() > Date.now())
+    const missionsWithParticipants = await attachParticipantPreviews(missions)
+    publicMissionsCache = {
+      expiresAt: Date.now() + PUBLIC_MISSIONS_CACHE_TTL_MS,
+      missions: missionsWithParticipants,
+    }
+    return missionsWithParticipants
+  })()
+
+  try {
+    return await publicMissionsRequest
+  } finally {
+    publicMissionsRequest = null
+  }
 }
 
 export async function setMissionSaved(missionId: string, saved: boolean) {
@@ -171,8 +193,11 @@ export async function getMySavedMissions(): Promise<Mission[]> {
     })
     .filter((slug): slug is string => Boolean(slug))
 
-  const missions = await Promise.all(slugs.map((slug) => getMissionBySlug(slug)))
-  return missions.filter((mission): mission is Mission => mission !== null)
+  const publicMissions = await getPublicMissions()
+  const missionsBySlug = new Map(publicMissions.map((mission) => [mission.id, mission]))
+  return slugs
+    .map((slug) => missionsBySlug.get(slug))
+    .filter((mission): mission is Mission => mission !== undefined)
 }
 
 export async function getMyRegistration(missionId: string) {
@@ -221,10 +246,13 @@ export async function getMyJoinedMissions(): Promise<Mission[]> {
     })
     .filter((slug): slug is string => Boolean(slug))
 
-  const missions = await Promise.all(slugs.map((slug) => getMissionBySlug(slug)))
+  const publicMissions = await getPublicMissions()
+  const missionsBySlug = new Map(publicMissions.map((mission) => [mission.id, mission]))
+  const missions = slugs
+    .map((slug) => missionsBySlug.get(slug))
+    .filter((mission): mission is Mission => mission !== undefined)
 
   return missions
-    .filter((mission): mission is Mission => mission !== null)
     .filter((mission) => new Date(mission.endsAt).getTime() > Date.now())
     .sort(
       (first, second) =>
