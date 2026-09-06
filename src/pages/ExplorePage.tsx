@@ -180,7 +180,7 @@ export function ExplorePage() {
       <h1 className="text-[28px] font-bold tracking-[-0.03em]">Explorer</h1>
       <p className="mt-1 text-sm text-slate-500">Missions, associations et bénévoles dfi3a.</p>
 
-      <label className="mt-5 flex min-h-12 items-center gap-2 rounded-[18px] border border-slate-300 bg-white px-4 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+      <label className="mt-5 flex min-h-12 items-center gap-2 rounded-[18px] border border-slate-300 bg-white px-4 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100" data-tour="explore-search">
         <Search aria-hidden="true" className="text-slate-400" size={20} />
         <input
           className="min-w-0 flex-1 bg-transparent text-base outline-none"
@@ -191,7 +191,7 @@ export function ExplorePage() {
         />
       </label>
 
-      <div className="mt-4 grid grid-cols-3 gap-1 rounded-[18px] bg-slate-100 p-1" role="tablist" aria-label="Type de recherche">
+      <div className="mt-4 grid grid-cols-3 gap-1 rounded-[18px] bg-slate-100 p-1" data-tour="explore-directories" role="tablist" aria-label="Type de recherche">
         <DirectoryTabButton active={activeDirectory === 'missions'} icon={MapPin} label="Missions" onClick={() => setActiveDirectory('missions')} />
         <DirectoryTabButton active={activeDirectory === 'ngos'} icon={Building2} label="ONG" onClick={() => setActiveDirectory('ngos')} />
         <DirectoryTabButton active={activeDirectory === 'users'} icon={UserRound} label="Utilisateurs" onClick={() => setActiveDirectory('users')} />

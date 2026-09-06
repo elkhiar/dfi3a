@@ -72,7 +72,7 @@ export function MyEventsPage() {
       <h1 className="mt-1 text-[28px] font-bold tracking-[-0.03em]">Mes événements</h1>
       <p className="mt-1 text-sm text-slate-500">Retrouvez vos prochaines missions et vos favoris.</p>
 
-      <div className="mt-6 grid grid-cols-3 rounded-full bg-slate-100 p-1">
+      <div className="mt-6 grid grid-cols-3 rounded-full bg-slate-100 p-1" data-tour="events-tabs">
         <TabButton active={activeTab === 'joined'} onClick={() => setActiveTab('joined')}>
           À venir
         </TabButton>

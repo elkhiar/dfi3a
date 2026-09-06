@@ -173,8 +173,8 @@ export function HomePage() {
         </Link>
 
         <div className="flex h-11 items-center rounded-full border border-slate-300 bg-white pl-3 pr-1.5 shadow-sm">
-          <DBuxAmount amount={user ? totalPoints : 0} className="mr-1.5 text-sm font-semibold text-slate-700" iconClassName="h-[18px] w-auto" />
-          <NotificationBell />
+          <span data-tour="points-wallet"><DBuxAmount amount={user ? totalPoints : 0} className="mr-1.5 text-sm font-semibold text-slate-700" iconClassName="h-[18px] w-auto" /></span>
+          <span data-tour="notifications"><NotificationBell /></span>
           <button aria-label="Ouvrir le profil" className="ml-0.5 grid size-8 place-items-center overflow-hidden rounded-full bg-sky-500 text-xs font-bold text-white" onClick={() => navigate('/profile')} type="button">
             {user && avatarUrl ? <img alt="" className="size-full object-cover" src={avatarUrl} /> : String(user?.user_metadata?.first_name || user?.email || 'D').slice(0, 1).toUpperCase()}
           </button>

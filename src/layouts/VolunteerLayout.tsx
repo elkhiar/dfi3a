@@ -14,11 +14,11 @@ const navigation = [
 
 export function VolunteerLayout() {
   const location = useLocation()
-  const [hasCompletedTour, setHasCompletedTour] = useState(() => {
+  const [isTourOpen, setIsTourOpen] = useState(() => {
     try {
-      return window.localStorage.getItem(APP_TOUR_STORAGE_KEY) === 'completed'
+      return location.pathname === '/' && window.localStorage.getItem(APP_TOUR_STORAGE_KEY) !== 'completed'
     } catch {
-      return true
+      return false
     }
   })
   const {
@@ -36,7 +36,7 @@ export function VolunteerLayout() {
     } catch {
       // Closing the tutorial must work even when storage is unavailable.
     }
-    setHasCompletedTour(true)
+    setIsTourOpen(false)
   }
 
   if (isAuthLoading || (user && isAccountTypeLoading)) {
@@ -75,7 +75,7 @@ export function VolunteerLayout() {
           ))}
         </ul>
       </nav>
-      {location.pathname === '/' && !hasCompletedTour && <AppTour onComplete={completeTour} />}
+      {isTourOpen && <AppTour onComplete={completeTour} />}
     </div>
   )
 }
