@@ -55,7 +55,7 @@ export type FollowedNgo = PublicNgo & {
   followedAt: string
 }
 
-function getNgoLogoPublicUrl(path: string | null | undefined) {
+export function getNgoLogoPublicUrl(path: string | null | undefined) {
   if (!path) return null
   if (/^https?:\/\//i.test(path)) return path
   return supabase.storage.from('ngo-logos').getPublicUrl(path).data.publicUrl

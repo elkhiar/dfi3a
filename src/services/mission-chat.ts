@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase'
+import { getAvatarPublicUrl } from './profiles'
+import { getNgoLogoPublicUrl } from './ngos'
 
 export type MissionChatContext = {
   missionId: string
@@ -17,6 +19,8 @@ export type MissionChatMessage = {
   authorUserId: string
   authorDisplayName: string
   authorRole: 'volunteer' | 'ngo' | 'admin'
+  authorAvatarUrl: string | null
+  authorProfilePath: string | null
   content: string
   createdAt: string
 }
@@ -43,7 +47,7 @@ export async function getMissionChatContext(missionId: string): Promise<MissionC
 }
 
 export async function getMissionChatMessages(missionId: string) {
-  const { data, error } = await supabase.rpc('get_mission_chat_messages', {
+  const { data, error } = await supabase.rpc('get_mission_chat_messages_v2', {
     p_mission_id: missionId,
     p_limit: 100,
   })
@@ -54,6 +58,12 @@ export async function getMissionChatMessages(missionId: string) {
     authorUserId: row.author_user_id,
     authorDisplayName: row.author_display_name,
     authorRole: row.author_role,
+    authorAvatarUrl: row.author_role === 'ngo'
+      ? getNgoLogoPublicUrl(row.author_avatar_path)
+      : getAvatarPublicUrl(row.author_avatar_path),
+    authorProfilePath: row.author_role === 'ngo' && row.author_ngo_id
+      ? `/ngos/${row.author_ngo_id}`
+      : row.author_role === 'volunteer' ? `/users/${row.author_user_id}` : null,
     content: row.content,
     createdAt: row.created_at,
   })) as MissionChatMessage[]

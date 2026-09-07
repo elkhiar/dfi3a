@@ -60,6 +60,21 @@ export async function getUnreadNotificationCount() {
   return count ?? 0
 }
 
+export function subscribeToMyNotifications(userId: string, onChange: () => void) {
+  const channel = supabase
+    .channel(`notifications-${userId}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_user_id=eq.${userId}` },
+      onChange,
+    )
+    .subscribe()
+
+  return () => {
+    void supabase.removeChannel(channel)
+  }
+}
+
 export async function markNotificationRead(notificationId: string) {
   const { error } = await supabase.rpc('mark_notification_read', {
     p_notification_id: notificationId,
@@ -70,6 +85,14 @@ export async function markNotificationRead(notificationId: string) {
 
 export async function markAllNotificationsRead() {
   const { error } = await supabase.rpc('mark_all_notifications_read')
+  if (error) throw error
+  announceNotificationChange()
+}
+
+export async function markConversationNotificationsRead(actionPath: string) {
+  const { error } = await supabase.rpc('mark_conversation_notifications_read', {
+    p_action_path: actionPath,
+  })
   if (error) throw error
   announceNotificationChange()
 }

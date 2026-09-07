@@ -11,6 +11,7 @@ import {
   subscribeToMissionChat,
 } from '../services/mission-chat'
 import type { MissionChatContext, MissionChatMessage } from '../services/mission-chat'
+import { markConversationNotificationsRead } from '../services/notifications'
 
 function formatMessageTime(value: string) {
   return new Intl.DateTimeFormat('fr-FR', {
@@ -58,7 +59,12 @@ export function MissionChatPage() {
         const nextMessages = await getMissionChatMessages(missionId)
         if (!isCurrent) return
         setMessages(nextMessages)
-        unsubscribe = subscribeToMissionChat(missionId, () => void refreshMessages(missionId))
+        const notificationPath = `/missions/${nextContext.missionSlug}/chat`
+        void markConversationNotificationsRead(notificationPath).catch(() => undefined)
+        unsubscribe = subscribeToMissionChat(missionId, () => {
+          void refreshMessages(missionId)
+          void markConversationNotificationsRead(notificationPath).catch(() => undefined)
+        })
       })
       .catch(() => {
         if (isCurrent) setErrorMessage('Impossible d’ouvrir le groupe de discussion.')
@@ -156,10 +162,19 @@ export function MissionChatPage() {
               <div className="space-y-3">
                 {messages.map((message) => {
                   const isMine = message.authorUserId === user.id
+                  const authorProfilePath = isMine
+                    ? message.authorRole === 'ngo' ? '/ngo/profile' : message.authorRole === 'volunteer' ? '/profile' : null
+                    : message.authorProfilePath
                   return (
                     <article className={`flex ${isMine ? 'justify-end' : 'justify-start'}`} key={message.id}>
                       <div className={`max-w-[86%] rounded-[20px] px-3.5 py-3 shadow-sm ${isMine ? 'rounded-br-md bg-sky-500 text-white' : 'rounded-bl-md bg-white text-slate-800'}`}>
-                        <div className="flex items-center justify-between gap-4"><p className={`text-[11px] font-bold ${isMine ? 'text-sky-50' : message.authorRole === 'ngo' ? 'text-sky-700' : 'text-slate-500'}`}>{message.authorDisplayName}{message.authorRole === 'ngo' ? ' · ONG' : ''}</p><div className="flex items-center gap-1">{!isMine && <button aria-label="Signaler le message" className={`grid size-7 place-items-center rounded-full ${isMine ? 'text-white/80' : 'text-slate-400'}`} onClick={() => { setReportTarget(message); setReportReason('') }} type="button"><Flag aria-hidden="true" size={13} /></button>}{context.canModerate && <button aria-label="Supprimer le message" className={`grid size-7 place-items-center rounded-full ${isMine ? 'text-white/80' : 'text-rose-400'}`} onClick={() => void removeMessage(message)} type="button"><Trash2 aria-hidden="true" size={14} /></button>}</div></div>
+                        <div className="flex items-center justify-between gap-4">
+                          <button className={`flex min-w-0 items-center gap-2 text-left ${authorProfilePath ? 'cursor-pointer' : 'cursor-default'}`} disabled={!authorProfilePath} onClick={() => authorProfilePath && navigate(authorProfilePath)} type="button">
+                            <span className={`grid size-7 shrink-0 place-items-center overflow-hidden rounded-full text-[10px] font-bold ${isMine ? 'bg-white/20 text-white' : 'bg-slate-700 text-sky-300'}`}>{message.authorAvatarUrl ? <img alt="" className="size-full object-cover" src={message.authorAvatarUrl} /> : message.authorDisplayName.slice(0, 1).toUpperCase()}</span>
+                            <span className={`truncate text-[11px] font-bold underline-offset-2 ${authorProfilePath ? 'hover:underline' : ''} ${isMine ? 'text-sky-50' : message.authorRole === 'ngo' ? 'text-sky-700' : 'text-slate-500'}`}>{message.authorDisplayName}{message.authorRole === 'ngo' ? ' · ONG' : ''}</span>
+                          </button>
+                          <div className="flex items-center gap-1">{!isMine && <button aria-label="Signaler le message" className="grid size-7 place-items-center rounded-full text-slate-400" onClick={() => { setReportTarget(message); setReportReason('') }} type="button"><Flag aria-hidden="true" size={13} /></button>}{context.canModerate && <button aria-label="Supprimer le message" className={`grid size-7 place-items-center rounded-full ${isMine ? 'text-white/80' : 'text-rose-400'}`} onClick={() => void removeMessage(message)} type="button"><Trash2 aria-hidden="true" size={14} /></button>}</div>
+                        </div>
                         <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-5">{message.content}</p>
                         <time className={`mt-1.5 block text-right text-[10px] ${isMine ? 'text-sky-100' : 'text-slate-400'}`} dateTime={message.createdAt}>{formatMessageTime(message.createdAt)}</time>
                       </div>

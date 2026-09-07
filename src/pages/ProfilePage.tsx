@@ -250,11 +250,12 @@ export function ProfilePage() {
         <h2 className="text-lg font-bold">Confidentialité</h2>
         <div className="mt-3 divide-y divide-slate-100 rounded-[22px] border border-slate-200 px-4">
           <PrivacyToggle checked={draft.showInDirectory} label="Apparaître dans la recherche d’utilisateurs" onChange={(showInDirectory) => setDraft({ ...draft, showInDirectory })} />
+          <PrivacyToggle checked={draft.messagesFromFriendsOnly} label="Recevoir uniquement les messages de mes amis" onChange={(messagesFromFriendsOnly) => setDraft({ ...draft, messagesFromFriendsOnly })} />
           <PrivacyToggle checked={draft.showInParticipants} label="Visible parmi les participants" onChange={(showInParticipants) => setDraft({ ...draft, showInParticipants })} />
           <PrivacyToggle checked={draft.showInLeaderboard} label="Participer au classement" onChange={(showInLeaderboard) => setDraft({ ...draft, showInLeaderboard })} />
           <PrivacyToggle checked={draft.showCity} label="Afficher ma ville" onChange={(showCity) => setDraft({ ...draft, showCity })} />
         </div>
-        {(draft.showInDirectory !== profile.showInDirectory || draft.showInParticipants !== profile.showInParticipants || draft.showInLeaderboard !== profile.showInLeaderboard || draft.showCity !== profile.showCity) && (
+        {(draft.showInDirectory !== profile.showInDirectory || draft.messagesFromFriendsOnly !== profile.messagesFromFriendsOnly || draft.showInParticipants !== profile.showInParticipants || draft.showInLeaderboard !== profile.showInLeaderboard || draft.showCity !== profile.showCity) && (
           <button className="mt-3 min-h-11 w-full rounded-full bg-sky-500 text-sm font-bold text-white" onClick={() => void saveProfile()} type="button">Enregistrer les préférences</button>
         )}
       </section>

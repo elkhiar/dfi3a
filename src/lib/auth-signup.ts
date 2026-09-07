@@ -17,7 +17,7 @@ export async function syncVolunteerSignupProfile(user: SignupUser) {
     .update({
       city: typeof metadata.city === 'string' ? metadata.city : null,
       show_city: metadata.show_city !== false,
-      show_in_directory: metadata.show_in_directory === true,
+      show_in_directory: metadata.show_in_directory !== false,
       show_in_leaderboard: metadata.show_in_leaderboard !== false,
     })
     .eq('user_id', user.id)

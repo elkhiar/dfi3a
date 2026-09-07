@@ -9,6 +9,7 @@ export type VolunteerProfile = {
   bio: string
   avatarPath: string
   showInDirectory: boolean
+  messagesFromFriendsOnly: boolean
   showInParticipants: boolean
   showInLeaderboard: boolean
   showCity: boolean
@@ -45,6 +46,7 @@ export type LeaderboardEntry = {
   userId: string
   displayName: string
   city: string | null
+  avatarUrl: string | null
   points: number
   isCurrentUser: boolean
 }
@@ -57,7 +59,7 @@ export async function getMyProfile(): Promise<VolunteerProfile> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'user_id, first_name, last_name, birthdate, city, bio, avatar_path, show_in_directory, show_in_participants, show_in_leaderboard, show_city',
+      'user_id, first_name, last_name, birthdate, city, bio, avatar_path, show_in_directory, messages_from_friends_only, show_in_participants, show_in_leaderboard, show_city',
     )
     .eq('user_id', authData.user.id)
     .single()
@@ -72,7 +74,8 @@ export async function getMyProfile(): Promise<VolunteerProfile> {
     city: data.city ?? '',
     bio: data.bio ?? '',
     avatarPath: data.avatar_path ?? '',
-    showInDirectory: data.show_in_directory ?? false,
+    showInDirectory: data.show_in_directory ?? true,
+    messagesFromFriendsOnly: data.messages_from_friends_only ?? false,
     showInParticipants: data.show_in_participants,
     showInLeaderboard: data.show_in_leaderboard,
     showCity: data.show_city,
@@ -93,6 +96,7 @@ export async function updateMyProfile(
       bio: changes.bio || null,
       avatar_path: changes.avatarPath || null,
       show_in_directory: changes.showInDirectory,
+      messages_from_friends_only: changes.messagesFromFriendsOnly,
       show_in_participants: changes.showInParticipants,
       show_in_leaderboard: changes.showInLeaderboard,
       show_city: changes.showCity,
@@ -223,6 +227,7 @@ export async function getLeaderboard(period: 'month' | 'all'): Promise<Leaderboa
     userId: row.user_id,
     displayName: row.display_name || 'Bénévole dfi3a',
     city: row.city,
+    avatarUrl: getAvatarPublicUrl(row.avatar_path),
     points: Number(row.points),
     isCurrentUser: row.is_current_user,
   }))

@@ -2,33 +2,36 @@ import { Bell } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
-import { getUnreadNotificationCount } from '../services/notifications'
+import { getUnreadNotificationCount, subscribeToMyNotifications } from '../services/notifications'
 
 export function NotificationBell({ className = '' }: { className?: string }) {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const userId = user?.id ?? null
   const [unreadCount, setUnreadCount] = useState(0)
 
   const refreshCount = useCallback(() => {
-    if (!user) return
+    if (!userId) return
 
     void getUnreadNotificationCount()
       .then(setUnreadCount)
       .catch(() => setUnreadCount(0))
-  }, [user])
+  }, [userId])
 
   useEffect(() => {
     refreshCount()
+    const unsubscribe = userId ? subscribeToMyNotifications(userId, refreshCount) : undefined
     const refreshWhenVisible = () => {
       if (document.visibilityState === 'visible') refreshCount()
     }
     window.addEventListener('dfi3a:notifications-changed', refreshCount)
     document.addEventListener('visibilitychange', refreshWhenVisible)
     return () => {
+      unsubscribe?.()
       window.removeEventListener('dfi3a:notifications-changed', refreshCount)
       document.removeEventListener('visibilitychange', refreshWhenVisible)
     }
-  }, [refreshCount])
+  }, [refreshCount, userId])
 
   const visibleUnreadCount = user ? unreadCount : 0
 

@@ -1,4 +1,4 @@
-import { CalendarDays, Home, Search, Trophy, UserRound } from 'lucide-react'
+import { CalendarDays, Home, MessageCircle, Search, Trophy, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
@@ -8,6 +8,7 @@ const navigation = [
   { label: 'Accueil', to: '/', icon: Home },
   { label: 'Explorer', to: '/explore', icon: Search },
   { label: 'Événements', to: '/events', icon: CalendarDays },
+  { label: 'Messages', to: '/messages', icon: MessageCircle },
   { label: 'Classement', to: '/leaderboard', icon: Trophy },
   { label: 'Profil', to: '/profile', icon: UserRound },
 ]
@@ -60,7 +61,7 @@ export function VolunteerLayout() {
             <li className="min-w-0 shrink-0" key={to}>
               <NavLink
                 aria-label={label}
-                className={({ isActive }) => `flex min-h-11 items-center justify-center gap-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'w-[112px] bg-slate-500 px-2 text-sky-300 min-[380px]:w-[124px]' : 'w-11 text-sky-300 hover:bg-slate-600'}`}
+                className={({ isActive }) => `flex min-h-11 items-center justify-center gap-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'w-[108px] bg-slate-500 px-1.5 text-sky-300 min-[380px]:w-[116px]' : 'w-9 min-[380px]:w-10 text-sky-300 hover:bg-slate-600'}`}
                 end={to === '/'}
                 to={to}
               >

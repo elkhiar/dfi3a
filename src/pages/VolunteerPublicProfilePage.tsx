@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, Check, MapPin, Trophy, UserMinus, UserPlus, X } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Check, MapPin, MessageCircle, Trophy, UserMinus, UserPlus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
@@ -12,6 +12,7 @@ import {
   sendFriendRequest,
 } from '../services/profiles'
 import type { FriendshipState, PublicVolunteerProfile } from '../services/profiles'
+import { canMessageUser } from '../services/messages'
 
 export function VolunteerPublicProfilePage() {
   const navigate = useNavigate()
@@ -23,13 +24,17 @@ export function VolunteerPublicProfilePage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [loadError, setLoadError] = useState(false)
   const [message, setMessage] = useState('')
+  const [canMessage, setCanMessage] = useState(false)
 
   useEffect(() => {
     let isCurrent = true
     const requests: Promise<unknown>[] = [
       getPublicVolunteerProfile(userId).then((result) => { if (isCurrent) setProfile(result) }),
     ]
-    if (user) requests.push(getFriendshipState(userId).then((state) => { if (isCurrent) setFriendshipState(state) }))
+    if (user) {
+      requests.push(getFriendshipState(userId).then((state) => { if (isCurrent) setFriendshipState(state) }))
+      requests.push(canMessageUser(userId).then((allowed) => { if (isCurrent) setCanMessage(allowed) }))
+    }
     void Promise.all(requests)
       .catch(() => { if (isCurrent) setLoadError(true) })
       .finally(() => { if (isCurrent) setIsLoading(false) })
@@ -109,10 +114,12 @@ export function VolunteerPublicProfilePage() {
         onAccept={() => void runAction(() => respondFriendRequest(userId, true), 'Vous êtes maintenant amis.')}
         onAdd={requestFriendship}
         onCancel={() => void cancelRequest()}
+        onMessage={() => navigate(`/messages/${userId}`)}
         onReject={() => void runAction(() => respondFriendRequest(userId, false), 'Demande refusée.')}
         onRemove={() => void removeFriendship()}
         state={friendshipState}
       />
+      {canMessage && friendshipState !== 'self' && friendshipState !== 'friends' && <button className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-sky-200 text-sm font-bold text-sky-700" onClick={() => navigate(`/messages/${userId}`)} type="button"><MessageCircle aria-hidden="true" size={18} />Envoyer un message</button>}
       {message && <p className="mt-3 text-center text-xs text-slate-500" role="status">{message}</p>}
 
       {profile.totalPoints != null && <section className="mt-6 flex items-center gap-3 rounded-[22px] bg-slate-700 p-4 text-white"><span className="grid size-12 place-items-center rounded-full bg-sky-300 text-slate-700"><Trophy aria-hidden="true" size={22} /></span><div><p className="text-xs text-white/60">D-bux vérifiés</p><p className="mt-0.5 text-2xl font-bold"><DBuxAmount amount={profile.totalPoints} iconClassName="h-6 w-auto" /></p></div></section>}
@@ -127,9 +134,9 @@ export function VolunteerPublicProfilePage() {
   )
 }
 
-function FriendshipActions({ disabled, onAccept, onAdd, onCancel, onReject, onRemove, state }: { disabled: boolean; onAccept: () => void; onAdd: () => void; onCancel: () => void; onReject: () => void; onRemove: () => void; state: FriendshipState }) {
+function FriendshipActions({ disabled, onAccept, onAdd, onCancel, onMessage, onReject, onRemove, state }: { disabled: boolean; onAccept: () => void; onAdd: () => void; onCancel: () => void; onMessage: () => void; onReject: () => void; onRemove: () => void; state: FriendshipState }) {
   if (state === 'self') return <div className="mt-5 rounded-full bg-slate-100 py-3 text-center text-sm font-bold text-slate-600">Votre profil public</div>
-  if (state === 'friends') return <button className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-300 text-sm font-bold text-slate-700 disabled:opacity-60" disabled={disabled} onClick={onRemove} type="button"><UserMinus aria-hidden="true" size={18} />Retirer de mes amis</button>
+  if (state === 'friends') return <div className="mt-5 grid grid-cols-[1fr_auto] gap-2"><button className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-sky-500 px-5 text-sm font-bold text-white" onClick={onMessage} type="button"><MessageCircle aria-hidden="true" size={18} />Message</button><button aria-label="Retirer de mes amis" className="grid size-12 place-items-center rounded-full border border-slate-300 text-slate-600 disabled:opacity-60" disabled={disabled} onClick={onRemove} type="button"><UserMinus aria-hidden="true" size={18} /></button></div>
   if (state === 'outgoing_pending') return <button className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-300 text-sm font-bold text-slate-600 disabled:opacity-60" disabled={disabled} onClick={onCancel} type="button"><X aria-hidden="true" size={18} />Annuler la demande</button>
   if (state === 'incoming_pending') return <div className="mt-5 grid grid-cols-2 gap-2"><button className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-slate-300 text-sm font-bold text-slate-600 disabled:opacity-60" disabled={disabled} onClick={onReject} type="button"><X aria-hidden="true" size={18} />Refuser</button><button className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-sky-500 text-sm font-bold text-white disabled:opacity-60" disabled={disabled} onClick={onAccept} type="button"><Check aria-hidden="true" size={18} />Accepter</button></div>
   return <button className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-sky-500 text-sm font-bold text-white disabled:opacity-60" disabled={disabled} onClick={onAdd} type="button"><UserPlus aria-hidden="true" size={18} />Ajouter en ami</button>

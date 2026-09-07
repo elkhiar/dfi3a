@@ -6,6 +6,7 @@ import {
   CalendarClock,
   CalendarX2,
   CheckCheck,
+  MessageCircle,
   ShieldCheck,
   Siren,
   UserPlus,
@@ -17,6 +18,7 @@ import {
   getMyNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  subscribeToMyNotifications,
 } from '../services/notifications'
 import type { NotificationRecord } from '../services/notifications'
 
@@ -37,7 +39,8 @@ function formatNotificationTime(value: string) {
 function NotificationIcon({ type }: { type: string }) {
   const Icon = type.startsWith('attendance_')
     ? type === 'attendance_present' ? CalendarCheck : CalendarX2
-    : type === 'ngo_new_mission' ? Building2
+    : type === 'chat_message' || type === 'friend_message' ? MessageCircle
+      : type === 'ngo_new_mission' ? Building2
       : type === 'mission_cancelled' ? CalendarX2
       : type === 'mission_updated' ? CalendarClock
         : type.startsWith('friend_request_') ? UserPlus
@@ -64,7 +67,9 @@ export function NotificationsPage() {
   }
 
   useEffect(() => {
-    if (user) requestNotifications()
+    if (!user) return
+    requestNotifications()
+    return subscribeToMyNotifications(user.id, requestNotifications)
   }, [user])
 
   const retryNotifications = () => {
