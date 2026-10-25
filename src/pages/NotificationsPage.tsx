@@ -113,7 +113,7 @@ export function NotificationsPage() {
   }
 
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-md bg-slate-50 px-4 pb-10 pt-[max(1rem,env(safe-area-inset-top))] text-slate-950">
+    <main className="mx-auto min-h-dvh w-full max-w-md bg-slate-50 px-4 pb-10 pt-[max(1rem,env(safe-area-inset-top))] text-slate-950 lg:max-w-4xl lg:px-8 lg:pt-8">
       <header className="flex min-h-12 items-center justify-between gap-3">
         <button aria-label="Retour" className="grid size-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-700" onClick={() => navigate(backPath)} type="button"><ArrowLeft aria-hidden="true" size={21} /></button>
         {unreadCount > 0 && <button className="flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-sky-700" onClick={() => void markEverythingRead()} type="button"><CheckCheck aria-hidden="true" size={17} />Tout lire</button>}
@@ -132,7 +132,7 @@ export function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <div className="mt-6 rounded-[24px] bg-white p-8 text-center shadow-sm"><span className="mx-auto grid size-14 place-items-center rounded-full bg-sky-50 text-sky-600"><Bell aria-hidden="true" size={25} /></span><h2 className="mt-4 font-bold">Aucune notification</h2><p className="mt-1 text-sm leading-6 text-slate-500">Les inscriptions, décisions et changements importants apparaîtront ici.</p></div>
       ) : (
-        <section className="mt-5 space-y-2" aria-label="Liste des notifications">
+        <section className="mt-5 space-y-2 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0" aria-label="Liste des notifications">
           {notifications.map((notification) => (
             <button className={`flex w-full items-start gap-3 rounded-[20px] p-4 text-left shadow-sm transition ${notification.readAt ? 'bg-white' : 'bg-sky-50 ring-1 ring-sky-100'}`} key={notification.id} onClick={() => void openNotification(notification)} type="button">
               <span className={`grid size-10 shrink-0 place-items-center rounded-full ${notification.readAt ? 'bg-slate-100 text-slate-500' : 'bg-sky-500 text-white'}`}><NotificationIcon type={notification.type} /></span>

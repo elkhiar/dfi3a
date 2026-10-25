@@ -39,12 +39,12 @@ export function LeaderboardPage() {
   }
 
   return (
-    <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.5rem,env(safe-area-inset-top))] lg:max-w-4xl lg:pt-0">
       <p className="text-xs font-semibold text-sky-600">Points vérifiés</p>
       <h1 className="mt-1 text-[28px] font-bold tracking-[-0.03em]">Classement</h1>
       <p className="mt-1 text-sm text-slate-500">Les points sont ajoutés après validation de la présence.</p>
 
-      <div className="mt-6 grid grid-cols-2 rounded-full bg-slate-100 p-1">
+      <div className="mt-6 grid grid-cols-2 rounded-full bg-slate-100 p-1 lg:max-w-lg">
         <PeriodButton active={period === 'month'} onClick={() => changePeriod('month')}>Ce mois</PeriodButton>
         <PeriodButton active={period === 'all'} onClick={() => changePeriod('all')}>Tout le temps</PeriodButton>
       </div>

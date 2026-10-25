@@ -152,7 +152,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.5rem,env(safe-area-inset-top))] lg:max-w-4xl lg:pt-0">
       <div className="flex items-center justify-between">
         <h1 className="text-[28px] font-bold tracking-[-0.03em]">Profil</h1>
         <button
@@ -204,7 +204,7 @@ export function ProfilePage() {
         </div>
       </section>
 
-      <section className="mt-6 rounded-[24px] bg-slate-700 p-4 text-white">
+      <section className="mt-6 rounded-[24px] bg-slate-700 p-4 text-white lg:p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-sky-200">Total vérifié</p>

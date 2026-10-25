@@ -53,7 +53,7 @@ export function MissionCard({
 
   if (variant === 'urgentCompact') {
     return (
-      <article className="group relative isolate aspect-[0.88] w-[174px] shrink-0 snap-start overflow-hidden rounded-[22px] bg-slate-900 text-white shadow-sm">
+      <article className="group relative isolate aspect-[0.88] w-[174px] shrink-0 snap-start overflow-hidden rounded-[22px] bg-slate-900 text-white shadow-sm lg:w-full">
         <img alt="" className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.02]" src={mission.coverImageUrl} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/90" />
         <Link aria-label={`Voir la mission ${mission.title}`} className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white" to={`/missions/${mission.id}`} />
@@ -72,7 +72,7 @@ export function MissionCard({
 
   if (variant === 'homeFeed') {
     return (
-      <article className="w-full bg-white text-slate-950" data-tour="mission-card">
+      <article className="w-full bg-white text-slate-950 lg:overflow-hidden lg:rounded-[26px] lg:border lg:border-slate-200 lg:p-2 lg:shadow-sm" data-tour="mission-card">
         <div className="group relative isolate aspect-[1.6] w-full overflow-hidden rounded-[26px] bg-slate-900 shadow-sm">
           <img alt="" className="absolute inset-0 size-full object-cover transition duration-300 group-hover:scale-[1.02]" src={mission.coverImageUrl} />
           <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/35" />
@@ -83,7 +83,7 @@ export function MissionCard({
           </div>
           <span className={`absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold ${categoryStyles[mission.category] ?? 'bg-sky-600'}`}>{mission.category}</span>
         </div>
-        <div className="px-0.5 pt-3">
+        <div className="px-0.5 pt-3 lg:px-2 lg:pb-2">
           <Link className="relative z-10 block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to={`/missions/${mission.id}`}><h3 className="text-[20px] font-bold leading-tight tracking-[-0.025em]">{mission.title}</h3></Link>
           <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-sky-600"><CalendarDays aria-hidden="true" size={13} />{formatMissionDate(mission.startsAt)}</p>
           <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-slate-500"><MapPin aria-hidden="true" className="shrink-0" size={13} />{mission.generalArea}, {mission.city} · {mission.ngoName}</p>

@@ -14,6 +14,7 @@ import { useAuth } from '../auth/auth-context'
 import { DBuxAmount } from '../components/DBuxIcon'
 import { MissionCard } from '../components/MissionCard'
 import { NotificationBell } from '../components/NotificationBell'
+import { LandingPage } from './LandingPage'
 import {
   getMySavedMissionIds,
   getPublicMissions,
@@ -73,6 +74,12 @@ function categoryIcon(category: string) {
 }
 
 export function HomePage() {
+  const { isLoading, user } = useAuth()
+  if (isLoading) return <main className="grid min-h-dvh place-items-center bg-white"><span className="size-10 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></main>
+  return user ? <VolunteerHomePage /> : <LandingPage />
+}
+
+function VolunteerHomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [activeCategory, setActiveCategory] = useState('Tout')
@@ -170,10 +177,11 @@ export function HomePage() {
   })
 
   return (
-    <div className="overflow-hidden">
-      <header className="flex items-center justify-between gap-3 pt-1" data-tour="home-header">
+    <div className="overflow-hidden lg:overflow-visible">
+      <header className="flex items-center justify-between gap-3 pt-1 lg:rounded-[24px] lg:border lg:border-slate-200 lg:bg-white lg:px-5 lg:py-4" data-tour="home-header">
         <Link aria-label="Accueil DFI3A" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600" to="/">
-          <img alt="DFI3A" className="h-11 w-[104px] object-contain object-left" src="/dfi3a-logo.svg" />
+          <img alt="DFI3A" className="h-11 w-[104px] object-contain object-left lg:hidden" src="/dfi3a-logo.svg" />
+          <span className="hidden lg:block"><span className="block text-[11px] font-bold uppercase tracking-[0.16em] text-sky-600">Tableau d’accueil</span><span className="mt-0.5 block text-lg font-bold">Trouvez une mission qui vous ressemble</span></span>
         </Link>
 
         {user ? (
@@ -191,7 +199,7 @@ export function HomePage() {
         )}
       </header>
 
-      <nav aria-label="Filtrer par date" className="scrollbar-none -mr-4 mt-5 flex gap-2 overflow-x-auto pr-4 pb-1" data-tour="time-filters">
+      <nav aria-label="Filtrer par date" className="scrollbar-none -mr-4 mt-5 flex gap-2 overflow-x-auto pr-4 pb-1 lg:mr-0 lg:w-fit lg:rounded-full lg:border lg:border-slate-200 lg:bg-white lg:p-1" data-tour="time-filters">
         {timeFilters.map((filter) => {
           const isActive = activeTimeFilter === filter.id
           return <button aria-pressed={isActive} className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-semibold transition ${isActive ? 'bg-sky-500 text-white shadow-sm' : 'bg-white text-slate-700'}`} key={filter.id} onClick={() => setActiveTimeFilter(filter.id)} type="button">{filter.label}</button>
@@ -215,13 +223,13 @@ export function HomePage() {
             ) : urgentMissions.length === 0 ? (
               <div className="rounded-[22px] bg-slate-50 p-5 text-center text-sm text-slate-500">Aucune mission urgente pour cette période.</div>
             ) : (
-              <div className="scrollbar-none -mr-4 flex snap-x gap-2.5 overflow-x-auto pr-4 pb-2">
+              <div className="scrollbar-none -mr-4 flex snap-x gap-2.5 overflow-x-auto pr-4 pb-2 lg:mr-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:pr-0 xl:grid-cols-4">
                 {urgentMissions.map((mission) => <MissionCard key={mission.id} mission={mission} variant="urgentCompact" {...savedProps(mission)} />)}
               </div>
             )}
           </section>
 
-          {!isLoading && <nav aria-label="Filtrer par catégorie" className="scrollbar-none -mx-4 mt-5 flex overflow-x-auto border-b border-slate-100 px-4" data-tour="category-filters">
+          {!isLoading && <nav aria-label="Filtrer par catégorie" className="scrollbar-none -mx-4 mt-5 flex overflow-x-auto border-b border-slate-100 px-4 lg:mx-0 lg:rounded-[24px] lg:border lg:border-slate-200 lg:bg-white lg:px-4 lg:pt-2" data-tour="category-filters">
             {homeCategories.map((category) => {
               const isActive = activeCategory === category
               const Icon = categoryIcon(category)
@@ -237,7 +245,7 @@ export function HomePage() {
             {visibleMissions.length === 0 ? (
               <div className="rounded-[22px] bg-slate-50 p-6 text-center"><Sparkles className="mx-auto text-sky-400" size={25} /><p className="mt-2 text-sm font-semibold text-slate-600">Aucune mission pour ce filtre</p><button className="mt-3 text-sm font-bold text-sky-600" onClick={() => { setActiveCategory('Tout'); setActiveTimeFilter('upcoming') }} type="button">Afficher toutes les missions</button></div>
             ) : (
-              <div className="space-y-6">{visibleMissions.map((mission) => <MissionCard key={mission.id} mission={mission} variant="homeFeed" {...savedProps(mission)} />)}</div>
+              <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0 xl:grid-cols-3">{visibleMissions.map((mission) => <MissionCard key={mission.id} mission={mission} variant="homeFeed" {...savedProps(mission)} />)}</div>
             )}
           </section>}
         </>

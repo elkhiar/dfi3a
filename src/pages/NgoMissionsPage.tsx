@@ -40,7 +40,7 @@ export function NgoMissionsPage() {
   )
 
   return (
-    <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.5rem,env(safe-area-inset-top))] lg:max-w-6xl lg:pt-0">
       <div className="flex items-start justify-between gap-3">
         <div><p className="text-xs font-semibold text-sky-600">Espace ONG</p><h1 className="mt-1 text-[28px] font-bold tracking-[-0.03em]">Mes missions</h1></div>
         <Link aria-label="Créer une mission" className="grid size-11 place-items-center rounded-full bg-sky-500 text-white" to="/ngo/missions/new"><Plus aria-hidden="true" size={22} /></Link>
@@ -60,7 +60,7 @@ export function NgoMissionsPage() {
       ) : visibleMissions.length === 0 ? (
         <section className="mt-6 rounded-[24px] bg-white p-8 text-center shadow-sm"><CalendarDays className="mx-auto text-sky-500" size={30} /><h2 className="mt-3 font-bold">Aucune mission {activeTab === 'active' ? 'à venir' : 'terminée'}</h2><p className="mt-1 text-sm text-slate-500">{activeTab === 'active' ? 'Publiez une mission pour mobiliser des bénévoles.' : 'Vos missions finalisées apparaîtront ici.'}</p></section>
       ) : (
-        <section className="mt-5 space-y-3">{visibleMissions.map((mission) => <MissionCard key={mission.id} mission={mission} onCancel={() => { setSuccessMessage(''); setMissionToCancel(mission) }} />)}</section>
+        <section className="mt-5 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">{visibleMissions.map((mission) => <MissionCard key={mission.id} mission={mission} onCancel={() => { setSuccessMessage(''); setMissionToCancel(mission) }} />)}</section>
       )}
 
       {missionToCancel && (

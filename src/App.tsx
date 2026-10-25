@@ -11,6 +11,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(
 const FollowedNgosPage = lazy(() => import('./pages/FollowedNgosPage').then((module) => ({ default: module.FollowedNgosPage })))
 const FriendsPage = lazy(() => import('./pages/FriendsPage').then((module) => ({ default: module.FriendsPage })))
 const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
+const LandingPage = lazy(() => import('./pages/LandingPage').then((module) => ({ default: module.LandingPage })))
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage').then((module) => ({ default: module.LeaderboardPage })))
 const MyEventsPage = lazy(() => import('./pages/MyEventsPage').then((module) => ({ default: module.MyEventsPage })))
 const MissionDetailsPage = lazy(() => import('./pages/MissionDetailsPage').then((module) => ({ default: module.MissionDetailsPage })))
@@ -49,6 +50,7 @@ export default function App() {
       <Route path="auth/callback" element={<AuthCallbackPage />} />
       <Route path="auth/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="auth/reset-password" element={<ResetPasswordPage />} />
+      <Route path="welcome" element={<LandingPage />} />
       <Route path="missions/:missionId" element={<MissionDetailsPage />} />
       <Route path="missions/:missionId/chat" element={<MissionChatPage />} />
       <Route path="messages/:userId" element={<FriendChatPage />} />

@@ -20,6 +20,17 @@ body {
   min-height: 100vh;
 }
 
+@media (min-width: 1024px) {
+  body {
+    background: #f4f7fa;
+  }
+
+  ::selection {
+    background: #bae6fd;
+    color: #17212b;
+  }
+}
+
 button,
 input,
 select,

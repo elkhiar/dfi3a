@@ -141,7 +141,7 @@ export function MissionChatPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-slate-50 text-slate-950 shadow-sm">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-slate-50 text-slate-950 shadow-sm lg:my-6 lg:min-h-[calc(100dvh-3rem)] lg:max-w-4xl lg:overflow-hidden lg:rounded-[28px] lg:border lg:border-slate-200 lg:shadow-xl">
       <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
         <button aria-label="Retour à la mission" className="grid size-11 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-700" onClick={goBackToMission} type="button"><ArrowLeft aria-hidden="true" size={21} /></button>
         <div className="min-w-0 flex-1"><p className="text-[11px] font-semibold text-sky-600">Groupe de la mission</p><h1 className="truncate text-base font-bold">{context?.missionTitle ?? 'Discussion'}</h1></div>
@@ -154,7 +154,7 @@ export function MissionChatPage() {
         <div className="grid flex-1 place-items-center p-6 text-center"><div><span className="mx-auto grid size-16 place-items-center rounded-full bg-sky-100 text-sky-700"><MessageCircle aria-hidden="true" size={28} /></span><h2 className="mt-5 text-xl font-bold">Groupe réservé aux participants</h2><p className="mt-2 text-sm leading-6 text-slate-500">Inscrivez-vous à cette mission pour accéder à sa discussion.</p><button className="mt-6 min-h-12 rounded-full bg-sky-500 px-6 text-sm font-bold text-white" onClick={goBackToMission} type="button">Voir la mission</button></div></div>
       ) : (
         <>
-          <section className="flex-1 px-4 py-5" aria-label="Messages du groupe">
+          <section className="flex-1 px-4 py-5 lg:px-8" aria-label="Messages du groupe">
             <div className="mb-5 rounded-[18px] bg-sky-50 p-3 text-center text-xs leading-5 text-sky-800">Ce groupe sert à l’organisation de la mission. Aucun fichier ou message privé n’est autorisé.</div>
             {messages.length === 0 ? (
               <div className="grid min-h-56 place-items-center text-center"><div><MessageCircle className="mx-auto text-sky-400" size={30} /><h2 className="mt-3 font-bold">Lancez la conversation</h2><p className="mt-1 text-sm text-slate-500">Posez une question ou partagez une information utile.</p></div></div>
@@ -167,7 +167,7 @@ export function MissionChatPage() {
                     : message.authorProfilePath
                   return (
                     <article className={`flex ${isMine ? 'justify-end' : 'justify-start'}`} key={message.id}>
-                      <div className={`max-w-[86%] rounded-[20px] px-3.5 py-3 shadow-sm ${isMine ? 'rounded-br-md bg-sky-500 text-white' : 'rounded-bl-md bg-white text-slate-800'}`}>
+                      <div className={`max-w-[86%] rounded-[20px] px-3.5 py-3 shadow-sm lg:max-w-[65%] ${isMine ? 'rounded-br-md bg-sky-500 text-white' : 'rounded-bl-md bg-white text-slate-800'}`}>
                         <div className="flex items-center justify-between gap-4">
                           <button className={`flex min-w-0 items-center gap-2 text-left ${authorProfilePath ? 'cursor-pointer' : 'cursor-default'}`} disabled={!authorProfilePath} onClick={() => authorProfilePath && navigate(authorProfilePath)} type="button">
                             <span className={`grid size-7 shrink-0 place-items-center overflow-hidden rounded-full text-[10px] font-bold ${isMine ? 'bg-white/20 text-white' : 'bg-slate-700 text-sky-300'}`}>{message.authorAvatarUrl ? <img alt="" className="size-full object-cover" src={message.authorAvatarUrl} /> : message.authorDisplayName.slice(0, 1).toUpperCase()}</span>
@@ -186,7 +186,7 @@ export function MissionChatPage() {
             )}
           </section>
 
-          <footer className="sticky bottom-0 border-t border-slate-200 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <footer className="sticky bottom-0 border-t border-slate-200 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:px-6">
             {errorMessage && <p className="mb-2 rounded-[14px] bg-rose-50 px-3 py-2 text-xs text-rose-700" role="alert">{errorMessage}</p>}
             {context.canSend ? (
               <form className="flex items-end gap-2" onSubmit={(event) => { event.preventDefault(); void sendMessage() }}>

@@ -75,7 +75,7 @@ export function NgoDashboardPage() {
   if (!application || application.status !== 'approved') return <AccessCard />
 
   return (
-    <div className="pt-[max(0.25rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.25rem,env(safe-area-inset-top))] lg:max-w-6xl lg:pt-0">
       <header className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           {application.logoUrl ? <img alt={`Logo ${application.name}`} className="size-12 rounded-2xl border border-slate-100 bg-white object-cover shadow-sm" src={application.logoUrl} /> : <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-sky-500 text-lg font-bold text-white">{application.name.slice(0, 1).toUpperCase()}</span>}
@@ -84,12 +84,12 @@ export function NgoDashboardPage() {
         <NotificationBell className="bg-white shadow-sm" />
       </header>
 
-      <Link className="mt-5 flex min-h-14 w-full items-center justify-between rounded-[20px] bg-sky-500 px-5 text-white shadow-lg shadow-sky-100 transition active:scale-[0.99]" to="/ngo/missions/new">
+      <Link className="mt-5 flex min-h-14 w-full items-center justify-between rounded-[20px] bg-sky-500 px-5 text-white shadow-lg shadow-sky-100 transition active:scale-[0.99] lg:max-w-2xl" to="/ngo/missions/new">
         <span className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-full bg-white/20"><Plus aria-hidden="true" size={21} /></span><span><span className="block text-sm font-bold">Publier une mission</span><span className="block text-[11px] text-white/75">Mobilisez votre communauté</span></span></span>
         <ArrowRight aria-hidden="true" size={20} />
       </Link>
 
-      <section aria-label="Résumé de votre activité" className="mt-5 grid grid-cols-2 gap-3">
+      <section aria-label="Résumé de votre activité" className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Metric icon={CalendarDays} label="Missions actives" tone="sky" value={dashboard.active.length} />
         <Metric icon={UsersRound} label="Inscriptions actives" tone="violet" value={dashboard.registrations} />
         <Metric icon={Clock3} label="À venir" tone="emerald" value={dashboard.upcoming.length} />
@@ -103,7 +103,7 @@ export function NgoDashboardPage() {
 
       <section className="mt-7">
         <div className="flex items-center justify-between"><h2 className="text-xl font-bold tracking-[-0.025em]">Accès rapides</h2><Sparkles aria-hidden="true" className="text-sky-500" size={19} /></div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <QuickLink icon={CalendarDays} label="Toutes les missions" to="/ngo/missions" />
           <QuickLink icon={MessageCircle} label="Messages" to="/ngo/messages" />
           <QuickLink icon={TrendingUp} label="Classement" to="/ngo/leaderboard" />

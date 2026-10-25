@@ -67,7 +67,7 @@ export function MyEventsPage() {
   }, [isAuthLoading, user])
 
   return (
-    <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.5rem,env(safe-area-inset-top))] lg:max-w-6xl lg:pt-0">
       <p className="text-xs font-semibold text-sky-600">Votre engagement</p>
       <h1 className="mt-1 text-[28px] font-bold tracking-[-0.03em]">Mes événements</h1>
       <p className="mt-1 text-sm text-slate-500">Retrouvez vos prochaines missions et vos favoris.</p>
@@ -112,7 +112,7 @@ export function MyEventsPage() {
           title="Aucun historique"
         />
       ) : activeTab === 'history' ? (
-        <section className="mt-6 space-y-3" aria-label="Historique privé des missions">
+        <section className="mt-6 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0" aria-label="Historique privé des missions">
           {history.map((entry) => <HistoryCard entry={entry} key={entry.registrationId} />)}
         </section>
       ) : activeTab === 'saved' && savedMissions.length === 0 ? (
@@ -122,7 +122,7 @@ export function MyEventsPage() {
           title="Aucune mission enregistrée"
         />
       ) : activeTab === 'saved' ? (
-        <section className="mt-6 space-y-3" aria-label="Missions enregistrées">
+        <section className="mt-6 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0" aria-label="Missions enregistrées">
           {savedMissions.map((mission) => (
             <JoinedMissionCard key={mission.id} mission={mission} status="saved" />
           ))}
@@ -134,7 +134,7 @@ export function MyEventsPage() {
           title="Aucune mission à venir"
         />
       ) : (
-        <section className="mt-6 space-y-3" aria-label="Missions à venir">
+        <section className="mt-6 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0" aria-label="Missions à venir">
           {missions.map((mission) => (
             <JoinedMissionCard key={mission.id} mission={mission} />
           ))}

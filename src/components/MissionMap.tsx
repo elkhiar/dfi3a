@@ -209,7 +209,7 @@ export function MissionMap({
   }
 
   return (
-    <section className="relative mt-4 h-[470px] overflow-hidden rounded-[24px] border border-sky-100 bg-sky-50" aria-label="Carte des missions">
+    <section className="relative mt-4 h-[470px] overflow-hidden rounded-[24px] border border-sky-100 bg-sky-50 lg:h-[min(680px,calc(100vh-250px))] lg:min-h-[520px]" aria-label="Carte des missions">
       <div className="size-full" ref={containerRef} />
       <button className="absolute left-3 top-3 z-10 flex min-h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-bold text-sky-700 shadow-lg disabled:opacity-60" disabled={isLocating} onClick={onLocate} type="button">
         {isLocating ? <LoaderCircle aria-hidden="true" className="animate-spin" size={18} /> : <LocateFixed aria-hidden="true" size={18} />}

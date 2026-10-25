@@ -52,19 +52,19 @@ export function MessagesPage() {
   if (!user) return <Navigate replace to="/auth?mode=login&returnTo=%2Fmessages" />
 
   return (
-    <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.5rem,env(safe-area-inset-top))] lg:max-w-5xl lg:pt-0">
       <p className="text-xs font-semibold text-sky-600">Vos conversations</p>
       <h1 className="mt-1 text-[28px] font-bold tracking-[-0.03em]">Messages</h1>
       <p className="mt-1 text-sm leading-5 text-slate-500">Échangez en privé ou avec les participants de vos missions.</p>
 
-      <nav aria-label="Filtrer les conversations" className="mt-5 flex rounded-full bg-slate-100 p-1">
+      <nav aria-label="Filtrer les conversations" className="mt-5 flex rounded-full bg-slate-100 p-1 lg:max-w-xl">
         {filters.map((item) => <button aria-pressed={filter === item.id} className={`min-h-10 flex-1 rounded-full text-xs font-bold transition ${filter === item.id ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-500'}`} key={item.id} onClick={() => setFilter(item.id)} type="button">{item.label}</button>)}
       </nav>
 
       {isLoading ? <div className="grid min-h-72 place-items-center"><span className="size-9 animate-spin rounded-full border-4 border-sky-100 border-t-sky-500" /></div>
         : errorMessage ? <p className="mt-6 rounded-[20px] bg-rose-50 p-4 text-sm text-rose-700">{errorMessage}</p>
           : visibleConversations.length === 0 ? <div className="mt-6 rounded-[24px] bg-slate-50 p-8 text-center"><MessagesSquare className="mx-auto text-sky-500" size={30} /><h2 className="mt-3 font-bold">Aucune conversation</h2><p className="mt-1 text-sm leading-5 text-slate-500">Rejoignez une mission ou ouvrez le profil d’un utilisateur pour commencer à discuter.</p></div>
-            : <section className="mt-5 space-y-2" aria-label="Liste des conversations">{visibleConversations.map((conversation) => <ConversationRow conversation={conversation} key={conversation.id} />)}</section>}
+            : <section className="mt-5 space-y-2 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0" aria-label="Liste des conversations">{visibleConversations.map((conversation) => <ConversationRow conversation={conversation} key={conversation.id} />)}</section>}
     </div>
   )
 }

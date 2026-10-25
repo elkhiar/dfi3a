@@ -233,8 +233,8 @@ export function MissionDetailsPage() {
           : <>Participer · <DBuxAmount amount={mission.points} iconClassName="h-3.5 w-auto" /></>
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md bg-white pb-28 text-slate-950 shadow-sm">
-      <header className="relative h-[248px] overflow-hidden rounded-b-[28px] bg-slate-900">
+    <div className="mx-auto min-h-dvh w-full max-w-md bg-white pb-28 text-slate-950 shadow-sm lg:grid lg:max-w-7xl lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)] lg:items-start lg:gap-9 lg:bg-slate-50 lg:p-8 lg:pb-36 lg:shadow-none">
+      <header className="relative h-[248px] overflow-hidden rounded-b-[28px] bg-slate-900 lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)] lg:max-h-[820px] lg:min-h-[560px] lg:rounded-[32px] lg:shadow-xl">
         <img
           alt=""
           className="absolute inset-0 size-full object-cover"
@@ -271,7 +271,7 @@ export function MissionDetailsPage() {
         )}
       </header>
 
-      <main className="px-4 pt-5">
+      <main className="px-4 pt-5 lg:px-0 lg:pt-2">
         <div className="flex flex-wrap gap-1.5">
           <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-600">
             {mission.category}
@@ -405,7 +405,7 @@ export function MissionDetailsPage() {
         </section>}
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-md gap-2 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-md gap-2 border-t border-slate-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:bottom-5 lg:max-w-xl lg:rounded-[24px] lg:border lg:pb-3 lg:shadow-xl">
         {isViewerContextLoading ? (
           <div className="grid min-h-12 flex-1 place-items-center"><span className="size-6 animate-spin rounded-full border-2 border-sky-100 border-t-sky-500" /></div>
         ) : viewerError ? (

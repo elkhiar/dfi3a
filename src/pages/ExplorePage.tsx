@@ -176,11 +176,11 @@ export function ExplorePage() {
   }
 
   return (
-    <div className="pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pt-[max(0.5rem,env(safe-area-inset-top))] lg:pt-0">
       <h1 className="text-[28px] font-bold tracking-[-0.03em]">Explorer</h1>
       <p className="mt-1 text-sm text-slate-500">Missions, associations et bénévoles dfi3a.</p>
 
-      <label className="mt-5 flex min-h-12 items-center gap-2 rounded-[18px] border border-slate-300 bg-white px-4 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100" data-tour="explore-search">
+      <label className="mt-5 flex min-h-12 items-center gap-2 rounded-[18px] border border-slate-300 bg-white px-4 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100 lg:max-w-3xl lg:shadow-sm" data-tour="explore-search">
         <Search aria-hidden="true" className="text-slate-400" size={20} />
         <input
           className="min-w-0 flex-1 bg-transparent text-base outline-none"
@@ -191,7 +191,7 @@ export function ExplorePage() {
         />
       </label>
 
-      <div className="mt-4 grid grid-cols-3 gap-1 rounded-[18px] bg-slate-100 p-1" data-tour="explore-directories" role="tablist" aria-label="Type de recherche">
+      <div className="mt-4 grid grid-cols-3 gap-1 rounded-[18px] bg-slate-100 p-1 lg:max-w-2xl" data-tour="explore-directories" role="tablist" aria-label="Type de recherche">
         <DirectoryTabButton active={activeDirectory === 'missions'} icon={MapPin} label="Missions" onClick={() => setActiveDirectory('missions')} />
         <DirectoryTabButton active={activeDirectory === 'ngos'} icon={Building2} label="ONG" onClick={() => setActiveDirectory('ngos')} />
         <DirectoryTabButton active={activeDirectory === 'users'} icon={UserRound} label="Utilisateurs" onClick={() => setActiveDirectory('users')} />
@@ -265,7 +265,7 @@ function MissionResults({ filteredMissions, hasUserLocation, isLoading, isLocati
       ) : filteredMissions.length === 0 ? (
         <Empty title="Aucune mission trouvée" text="Essayez un autre mot-clé." />
       ) : missionView === 'list' ? (
-        <section className="mt-4 grid grid-cols-2 gap-2" aria-label="Résultats de missions">
+        <section className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-4 xl:grid-cols-4" aria-label="Résultats de missions">
           {filteredMissions.map((mission) => (
             <MissionCard
               isSaved={mission.databaseId ? savedMissionIds.has(mission.databaseId) : false}
@@ -300,7 +300,7 @@ function NgoResults({ isLoading, ngos }: { isLoading: boolean; ngos: PublicNgo[]
   if (isLoading) return <Loading />
   if (ngos.length === 0) return <Empty title="Aucune ONG trouvée" text="Essayez un autre nom ou une autre ville." />
   return (
-    <section className="mt-4 space-y-3" aria-label="Résultats des ONG">
+    <section className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3" aria-label="Résultats des ONG">
       {ngos.map((ngo) => (
         <Link aria-label={`Voir le profil de ${ngo.name}`} className="flex gap-3 rounded-[22px] border border-slate-200 bg-white p-4 transition active:scale-[0.99]" key={ngo.id} to={`/ngos/${ngo.id}`}>
           {ngo.logoUrl ? <img alt="" className="size-14 shrink-0 rounded-[18px] object-cover" src={ngo.logoUrl} /> : <span className="grid size-14 shrink-0 place-items-center rounded-[18px] bg-sky-100 text-sky-700"><Building2 aria-hidden="true" size={25} /></span>}
@@ -319,7 +319,7 @@ function VolunteerResults({ isLoading, volunteers }: { isLoading: boolean; volun
   if (isLoading) return <Loading />
   if (volunteers.length === 0) return <Empty title="Aucun utilisateur trouvé" text="Seuls les bénévoles ayant choisi d’apparaître dans la recherche sont visibles ici." />
   return (
-    <section className="mt-4 space-y-3" aria-label="Résultats des utilisateurs">
+    <section className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3" aria-label="Résultats des utilisateurs">
       {volunteers.map((volunteer) => {
         const initials = volunteer.displayName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
         return (
