@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getSafeReturnTo } from '../lib/navigation'
+import { getAppRedirectUrl } from '../lib/platform'
 import { supabase } from '../lib/supabase'
 
 export function ForgotPasswordPage() {
@@ -20,7 +21,7 @@ export function ForgotPasswordPage() {
     setIsSubmitting(true)
 
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth/reset-password?returnTo=${encodeURIComponent(returnTo)}`,
+      redirectTo: getAppRedirectUrl(`/auth/reset-password?returnTo=${encodeURIComponent(returnTo)}`),
     })
 
     setIsSubmitting(false)

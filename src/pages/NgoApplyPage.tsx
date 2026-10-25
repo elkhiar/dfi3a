@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { emailAlreadyHasAccount } from '../lib/auth-signup'
+import { getAppRedirectUrl } from '../lib/platform'
 import { supabase } from '../lib/supabase'
 import {
   getMyAccountType,
@@ -94,7 +95,7 @@ function NgoAccountSignup() {
           first_name: String(form.get('firstName') || '').trim(),
           last_name: String(form.get('lastName') || '').trim(),
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent('/ngo/apply')}`,
+        emailRedirectTo: getAppRedirectUrl(`/auth/callback?returnTo=${encodeURIComponent('/ngo/apply')}`),
       },
     })
 
@@ -120,7 +121,7 @@ function NgoAccountSignup() {
       type: 'signup',
       email: confirmationEmail,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent('/ngo/apply')}`,
+        emailRedirectTo: getAppRedirectUrl(`/auth/callback?returnTo=${encodeURIComponent('/ngo/apply')}`),
       },
     })
 

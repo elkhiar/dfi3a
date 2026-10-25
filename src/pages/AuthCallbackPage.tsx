@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getSafeReturnTo } from '../lib/navigation'
+import { getAppRedirectUrl } from '../lib/platform'
 import { supabase } from '../lib/supabase'
 import { syncVolunteerSignupProfile } from '../lib/auth-signup'
 
@@ -63,7 +64,7 @@ export function AuthCallbackPage() {
       type: 'signup',
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`,
+        emailRedirectTo: getAppRedirectUrl(`/auth/callback?returnTo=${encodeURIComponent(returnTo)}`),
       },
     })
 

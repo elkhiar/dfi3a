@@ -25,6 +25,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { emailAlreadyHasAccount, syncVolunteerSignupProfile } from '../lib/auth-signup'
 import { getSafeReturnTo } from '../lib/navigation'
+import { getAppRedirectUrl } from '../lib/platform'
 import { supabase } from '../lib/supabase'
 
 type AuthMode = 'login' | 'signup'
@@ -133,7 +134,7 @@ export function AuthPage() {
             show_in_directory: signup.showInDirectory,
             show_in_leaderboard: signup.showInLeaderboard,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`,
+          emailRedirectTo: getAppRedirectUrl(`/auth/callback?returnTo=${encodeURIComponent(returnTo)}`),
         },
       })
       if (error) throw error

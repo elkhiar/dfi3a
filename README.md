@@ -53,6 +53,7 @@ Le projet est actuellement en phase de développement actif de son MVP.
 - Supabase : authentification, base de données, stockage et temps réel
 - MapLibre GL et Geoapify
 - Application web progressive (PWA)
+- Capacitor 8 et projet natif iOS en Swift
 
 ## Installation locale
 
@@ -87,6 +88,26 @@ npm run dev
 | `npm run lint` | Analyse la qualité du code |
 | `npm run check` | Exécute le lint et la compilation complète |
 | `npm run preview` | Prévisualise la version de production |
+| `npm run ios:sync` | Compile l'application et synchronise le projet iOS |
+| `npm run ios:open` | Ouvre le projet iOS dans Xcode sur macOS |
+
+## Application iOS
+
+Le dossier `ios/` contient le projet Xcode natif de Dfi3a. La même application React et les mêmes services Supabase sont partagés entre le web et iOS, tandis que Capacitor fournit l'accès aux fonctions natives.
+
+Prérequis pour compiler et signer l'application : macOS, Xcode et un compte Apple Developer. Après chaque modification du code web :
+
+```bash
+npm run ios:sync
+npm run ios:open
+```
+
+L'identifiant de l'application est `org.dfi3a.app` et le schéma de lien natif est `dfi3a://`. Les URL suivantes devront être ajoutées aux URL de redirection autorisées dans Supabase :
+
+```text
+dfi3a://auth/callback
+dfi3a://auth/reset-password
+```
 
 ## Structure du projet
 
@@ -101,6 +122,7 @@ src/
 supabase/
   migrations/    Schéma, règles RLS et fonctions SQL
 public/          Identité visuelle et ressources PWA
+ios/             Projet natif Xcode pour iPhone et iPad
 ```
 
 ## Sécurité et confidentialité
